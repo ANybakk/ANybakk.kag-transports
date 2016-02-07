@@ -5,6 +5,7 @@
  */
 
 #include "ConveyorBlobMode.as";
+#include "ConveyorBlobDirection.as";
 #include "ConveyorSprite.as";
 #include "BeltConveyorSpriteSection.as";
 
@@ -48,101 +49,230 @@ namespace Transports {
     
       //Call super type's onTick (for placement sound)
       Transports::ConveyorSprite::onTick(this);
-
+      
+      //Update section
+      updateSection(this);
+      
+      //Update animation
+      updateAnimation(this);
+      
+    }
+    
+    
+    
+    /**
+     * Updates animation
+     */
+    void updateAnimation(CSprite@ this) {
+    
       //Obtain a reference to the blob object
       CBlob@ blob = this.getBlob();
   
       //Retrieve current blob mode
       u8 blobMode = blob.get_u8("ConveyorBlobMode");
-  
-      //Retrieve current sprite mode
+      
+      //Retrieve current section
       u8 section = blob.get_u8("BeltConveyorSpriteSection");
       
-      //Check if blob mode is slow
-      if(blobMode == Transports::ConveyorBlobMode::MODE_SLOW) {
+      //Retrieve direction
+      u8 direction = blob.get_u8("ConveyorBlobDirection");
       
-        //Check if sprite section is standalone and animation not already active
-        if(section == Transports::BeltConveyorSpriteSection::SECTION_STANDALONE && !this.isAnimation("slow_left")) {
+      //Check if sprite section is standalone
+      if(section == Transports::BeltConveyorSpriteSection::SECTION_STANDALONE) {
+      
+        //Check if blob mode is slow and animation not active
+        if(blobMode == Transports::ConveyorBlobMode::MODE_SLOW && !this.isAnimation("slow_standalone")) {
         
           //Start slow left animation
           this.SetAnimation("slow_standalone");
-          
-        }
-      
-        //Otherwise, check if sprite section is left and animation not already active
-        else if(section == Transports::BeltConveyorSpriteSection::SECTION_LEFT && !this.isAnimation("slow_left")) {
         
-          //Start slow left animation
-          this.SetAnimation("slow_left");
-          
         }
-      
-        //Otherwise, check if sprite section is middle and animation not already active
-        else if(section == Transports::BeltConveyorSpriteSection::SECTION_MIDDLE && !this.isAnimation("slow_middle")) {
         
-          //Start slow left animation
-          this.SetAnimation("slow_middle");
-          
-        }
+        //Otherwise, check if mode is off and animation is not active
+        else if(blobMode == Transports::ConveyorBlobMode::MODE_OFF && !this.isAnimation("default")) {
       
-        //Otherwise, check if sprite section is right and animation not already active
-        else if(section == Transports::BeltConveyorSpriteSection::SECTION_RIGHT && !this.isAnimation("slow_right")) {
-        
-          //Start slow left animation
-          this.SetAnimation("slow_right");
-          
-        }
-      
-      }
-      
-      //Otherwise, check if blob mode is off
-      else if(blobMode == Transports::ConveyorBlobMode::MODE_OFF) {
-      
-        //Check if sprite section is standalone and animation not already active
-        if(section == Transports::BeltConveyorSpriteSection::SECTION_STANDALONE && !this.isAnimation("default")) {
-      
-          //Set default animation state (conveyor is not placed yet)
+          //Set default animation state
           this.SetAnimation("default");
       
           //Set default frame to left end
           this.animation.frame = Transports::BeltConveyorSpriteSection::SECTION_STANDALONE;
           
         }
+        
+      }
       
-        //Otherwise, check if sprite section is left and animation not already active
-        else if(section == Transports::BeltConveyorSpriteSection::SECTION_LEFT && !this.isAnimation("default")) {
+      //Otherwise, check if section is left edge
+      else if(section == Transports::BeltConveyorSpriteSection::SECTION_LEFT) {
       
-          //Set default animation state (conveyor is not placed yet)
+        //Check if blob mode is slow
+        if(blobMode == Transports::ConveyorBlobMode::MODE_SLOW) {
+        
+          //Check if direction is clockwise and left animation not active
+          if(direction == Transports::ConveyorBlobDirection::DIRECTION_CLOCKWISE && !this.isAnimation("slow_left")) {
+        
+            //Start slow left animation
+            this.SetAnimation("slow_left");
+            
+          }
+          
+          //Otherwise, check if direction is counter-clockwise and right animation not active (sprite is flipped)
+          else if(direction == Transports::ConveyorBlobDirection::DIRECTION_COUNTERCLOCKWISE && !this.isAnimation("slow_right")) {
+        
+            //Start slow right animation
+            this.SetAnimation("slow_right");
+            
+          }
+        
+        }
+        
+        //Otherwise, check if mode is off and animation is not active
+        else if(blobMode == Transports::ConveyorBlobMode::MODE_OFF && !this.isAnimation("default")) {
+      
+          //Set default animation state
           this.SetAnimation("default");
+          
+          //Check if direction is clockwise
+          if(direction == Transports::ConveyorBlobDirection::DIRECTION_CLOCKWISE) {
       
-          //Set default frame to left end
-          this.animation.frame = Transports::BeltConveyorSpriteSection::SECTION_LEFT;
+            //Set default frame to left end
+            this.animation.frame = Transports::BeltConveyorSpriteSection::SECTION_LEFT;
+            
+          }
+          
+          //Otherwise, check if direction is counter-clockwise
+          else if(direction == Transports::ConveyorBlobDirection::DIRECTION_COUNTERCLOCKWISE) {
+      
+            //Set default frame to right end (sprite is flipped)
+            this.animation.frame = Transports::BeltConveyorSpriteSection::SECTION_RIGHT;
+          
+          }
           
         }
+        
+      }
       
-        //Otherwise, check if sprite section is middle and animation not already active
-        else if(section == Transports::BeltConveyorSpriteSection::SECTION_MIDDLE && !this.isAnimation("default")) {
+      //Otherwise, check if section is right edge
+      else if(section == Transports::BeltConveyorSpriteSection::SECTION_RIGHT) {
       
-          //Set default animation state (conveyor is not placed yet)
+        //Check if blob mode is slow
+        if(blobMode == Transports::ConveyorBlobMode::MODE_SLOW) {
+        
+          //Check if direction is clockwise and right animation not active
+          if(direction == Transports::ConveyorBlobDirection::DIRECTION_CLOCKWISE && !this.isAnimation("slow_right")) {
+        
+            //Start slow right animation
+            this.SetAnimation("slow_right");
+            
+          }
+          
+          //Otherwise, check if direction is counter-clockwise and left animation not active (sprite is flipped)
+          else if(direction == Transports::ConveyorBlobDirection::DIRECTION_COUNTERCLOCKWISE && !this.isAnimation("slow_left")) {
+        
+            //Start slow left animation
+            this.SetAnimation("slow_left");
+            
+          }
+        
+        }
+        
+        //Otherwise, check if mode is off and animation is not active
+        else if(blobMode == Transports::ConveyorBlobMode::MODE_OFF && !this.isAnimation("default")) {
+      
+          //Set default animation state
+          this.SetAnimation("default");
+          
+          //Check if direction is clockwise
+          if(direction == Transports::ConveyorBlobDirection::DIRECTION_CLOCKWISE) {
+      
+            //Set default frame to right end
+            this.animation.frame = Transports::BeltConveyorSpriteSection::SECTION_RIGHT;
+            
+          }
+          
+          //Otherwise, check if direction is counter-clockwise
+          else if(direction == Transports::ConveyorBlobDirection::DIRECTION_COUNTERCLOCKWISE) {
+      
+            //Set default frame to left end (sprite is flipped)
+            this.animation.frame = Transports::BeltConveyorSpriteSection::SECTION_LEFT;
+          
+          }
+          
+        }
+        
+      }
+      
+      //Check if sprite section is middle
+      else if(section == Transports::BeltConveyorSpriteSection::SECTION_MIDDLE) {
+      
+        //Check if blob mode is slow and animation not active
+        if(blobMode == Transports::ConveyorBlobMode::MODE_SLOW && !this.isAnimation("slow_middle")) {
+        
+          //Start slow middle animation
+          this.SetAnimation("slow_middle");
+        
+        }
+        
+        //Otherwise, check if mode is off and animation is not active
+        else if(blobMode == Transports::ConveyorBlobMode::MODE_OFF && !this.isAnimation("default")) {
+      
+          //Set default animation state
           this.SetAnimation("default");
       
           //Set default frame to left end
           this.animation.frame = Transports::BeltConveyorSpriteSection::SECTION_MIDDLE;
           
         }
-      
-        //Otherwise, check if sprite section is right and animation not already active
-        else if(section == Transports::BeltConveyorSpriteSection::SECTION_RIGHT && !this.isAnimation("default")) {
-      
-          //Set default animation state (conveyor is not placed yet)
-          this.SetAnimation("default");
-      
-          //Set default frame to left end
-          this.animation.frame = Transports::BeltConveyorSpriteSection::SECTION_RIGHT;
-          
-        }
-      
+        
       }
+      
+      //Finished
+      return;
+      
+    }
+    
+    
+    
+    /**
+     * Updates section variable based on connections
+     */
+    void updateSection(CSprite@ this) {
+    
+      //Obtain a reference to the blob object
+      CBlob@ blob = this.getBlob();
+      
+      //Check if connected both to the left and to the right
+      if(blob.hasTag("isConnectedLeft") && blob.hasTag("isConnectedRight")) {
+      
+        //Set section to middle
+        blob.set_u8("BeltConveyorSpriteSection", Transports::BeltConveyorSpriteSection::SECTION_MIDDLE);
+        
+      }
+      
+      //Otherwise, check if connected to the right
+      else if(blob.hasTag("isConnectedRight")) {
+      
+        blob.set_u8("BeltConveyorSpriteSection", Transports::BeltConveyorSpriteSection::SECTION_LEFT);
+        
+      }
+      
+      //Otherwise, check if connected to the left
+      else if(blob.hasTag("isConnectedLeft")) {
+      
+        //Set section to right
+        blob.set_u8("BeltConveyorSpriteSection", Transports::BeltConveyorSpriteSection::SECTION_RIGHT);
+        
+      }
+      
+      //Otherwise
+      else {
+      
+        //Set section to standalone
+        blob.set_u8("BeltConveyorSpriteSection", Transports::BeltConveyorSpriteSection::SECTION_STANDALONE);
+        
+      }
+      
+      //Finished
+      return;
       
     }
     

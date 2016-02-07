@@ -39,3 +39,15 @@ bool doesCollideWithBlob(CBlob@ this, CBlob@ other) {
   return Transports::ConveyorBlob::doesCollideWithBlob(this, other);
   
 }
+
+void onCollision(CBlob@ this, CBlob@ other, bool solid, Vec2f normal, Vec2f point1) {
+
+  Transports::BeltConveyorBlob::onCollision(this, other, solid, normal, point1);
+  
+}
+
+void onEndCollision(CBlob@ this, CBlob@ blob) {
+
+  Transports::BeltConveyorBlob::onEndCollision(this, blob);
+  
+}
