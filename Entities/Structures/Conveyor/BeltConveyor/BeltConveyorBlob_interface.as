@@ -24,7 +24,7 @@ void onTick(CBlob@ this) {
 
 void onSetStatic(CBlob@ this, const bool isStatic) {
 
-	Transports::ConveyorBlob::onSetStatic(this, isStatic);
+	Transports::BeltConveyorBlob::onSetStatic(this, isStatic);
   
 }
 
@@ -49,5 +49,11 @@ void onCollision(CBlob@ this, CBlob@ other, bool solid, Vec2f normal, Vec2f poin
 void onEndCollision(CBlob@ this, CBlob@ blob) {
 
   Transports::BeltConveyorBlob::onEndCollision(this, blob);
+  
+}
+
+void onDie(CBlob@ this) {
+
+  Transports::BeltConveyorBlob::onDie(this);
   
 }

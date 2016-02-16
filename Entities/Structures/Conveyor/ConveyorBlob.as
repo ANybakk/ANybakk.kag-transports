@@ -19,7 +19,24 @@ namespace Transports {
       
       setTags(this);
       
+      //Set initial mode to OFF
       this.set_u8("ConveyorBlobMode", Transports::ConveyorBlobMode::MODE_OFF);
+      
+      //Set flag so that blob cannot be rotated when built (for BlobPlacement.as)
+      this.Tag("place norotate");
+
+      //Unset flag so that blob is flipped depending on direction faced (for BlobPlacement.as)
+      this.Untag("place ignore facing");
+      
+      //Set flag so that builder always hit (for BuilderHittable.as)
+      this.Tag("builder always hit");
+
+      //Unset flag so that swords hit (for KnightLogic.as)
+      //TODO: Sword won't do damage anyway
+      this.set_bool("ignore sword", Transports::ConveyorVariables::TAKE_DAMAGE_FROM_SWORD);
+      
+      //Set background tile type (for TileBackground.as)
+      this.set_TileType("background tile", Transports::ConveyorVariables::BACKGROUND_TILE_TYPE);
       
     }
     
@@ -78,7 +95,7 @@ namespace Transports {
       //Update direction
       updateDirection(this);
       
-      //Set mode to slow
+      //Set mode to default
       this.set_u8("ConveyorBlobMode", Transports::ConveyorVariables::DEFAULT_ON_MODE);
       
     }
@@ -98,6 +115,12 @@ namespace Transports {
      */
     void updateConnections(CBlob@ this) {
     
+      //Disable all connection flags
+      this.Untag("isConnectedRight");
+      this.Untag("isConnectedLeft");
+      this.Untag("isConnectedDown");
+      this.Untag("isConnectedUp");
+      
       //Obtain a reference to the map
       CMap@ map = this.getMap();
       
@@ -108,8 +131,8 @@ namespace Transports {
       CBlob@ nearbyBlob;
       
       //Check if any blobs are within radius
-      if(map.getBlobsInRadius(this.getPosition(), this.getRadius(), @nearbyBlobs)) {
-        
+      if(map.getBlobsInRadius(this.getPosition(), map.tilesize, @nearbyBlobs)) {
+      
         //Iterate through blob objects
         for(u8 i = 0; i<nearbyBlobs.length; i++) {
         
@@ -117,7 +140,6 @@ namespace Transports {
           @nearbyBlob = nearbyBlobs[i];
           
           //Check if blob is not this blob, tagged as conveyor and is placed
-          //TODO: is placed flag not working as expected
           if(nearbyBlob !is this && nearbyBlob.hasTag("isConveyor") && nearbyBlob.hasTag("isPlaced")) {
           
             //Check if same type name
@@ -125,8 +147,6 @@ namespace Transports {
             
               //Create a vector representing the relative displacement
               Vec2f relativeDisplacement = nearbyBlob.getPosition() - this.getPosition();
-              
-              //print("name= " + nearbyBlob.getName() + " displacement: x=" + relativeDisplacement.x + " y=" + relativeDisplacement.y);
               
               //Check if displaced one tile to the right
               if(relativeDisplacement.x == map.tilesize && relativeDisplacement.y == 0.0f) {
@@ -198,6 +218,18 @@ namespace Transports {
       
       //Finished
       return;
+      
+    }
+    
+    
+    
+    void onDie(CBlob@ this) {
+    
+      //Obtain a reference to the map object
+      CMap@ map = this.getMap();
+      
+      //Set empty tile
+      map.server_SetTile(this.getPosition(), CMap::tile_empty);
       
     }
     

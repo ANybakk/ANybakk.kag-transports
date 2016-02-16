@@ -15,7 +15,8 @@ namespace Transports {
     enum Mode {
     
       MODE_OFF = 0,
-      MODE_SLOW
+      MODE_SLOW,
+      MODE_NONE   //Not used (end reference)
       
     }
     
