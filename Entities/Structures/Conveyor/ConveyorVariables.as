@@ -15,7 +15,7 @@ namespace Transports {
       //Define an off mode with a target velocity of 0.0, 0.0
       Transports::ConveyorBlobModeData(Transports::ConveyorBlobMode::MODE_OFF, Vec2f(0.0f, 0.0f)),
     
-      //Define a slow mode with a target velocity of 4.0, 0.0 (should probably equal to animation time)
+      //Define a slow mode with a target velocity of 4.0, 0.0 (should probably be equal to animation time)
       Transports::ConveyorBlobModeData(Transports::ConveyorBlobMode::MODE_SLOW, Vec2f(4.0f, 0.0f))
       
     };

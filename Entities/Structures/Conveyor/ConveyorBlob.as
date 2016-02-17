@@ -33,7 +33,7 @@ namespace Transports {
 
       //Unset flag so that swords hit (for KnightLogic.as)
       //TODO: Sword won't do damage anyway
-      this.set_bool("ignore sword", Transports::ConveyorVariables::TAKE_DAMAGE_FROM_SWORD);
+      this.set_bool("ignore sword", !Transports::ConveyorVariables::TAKE_DAMAGE_FROM_SWORD);
       
       //Set background tile type (for TileBackground.as)
       this.set_TileType("background tile", Transports::ConveyorVariables::BACKGROUND_TILE_TYPE);
@@ -55,7 +55,7 @@ namespace Transports {
     void onTick(CBlob@ this) {
       
       //Update connections
-      updateConnections(this);
+      updateConnections(this, false, false);
       
       //Update direction
       updateDirection(this);
@@ -90,7 +90,7 @@ namespace Transports {
       this.Tag("isPlaced");
       
       //Update connections
-      updateConnections(this);
+      updateConnections(this, true, true);
       
       //Update direction
       updateDirection(this);
@@ -111,78 +111,93 @@ namespace Transports {
     
     
     /**
-     * Updates connection statuses for the blob
+     * Updates connection statuses for the blob (and any others of the same type in the same direction)
+     * 
+     * @param   doPropagate     whether to propagate linearly or not
+     * @param   doAnimationSync whether to synchronize animations (if propagating)
      */
-    void updateConnections(CBlob@ this) {
-    
-      //Disable all connection flags
-      this.Untag("isConnectedRight");
-      this.Untag("isConnectedLeft");
-      this.Untag("isConnectedDown");
-      this.Untag("isConnectedUp");
+    void updateConnections(CBlob@ this, bool doPropagate=false, bool doAnimationSync=false) {
       
-      //Obtain a reference to the map
-      CMap@ map = this.getMap();
+      //Check if placed
+      if(this.hasTag("isPlaced")) {
       
-      //Create an array of blob object references
-      CBlob@[] nearbyBlobs;
-      
-      //Create a handle for a blob object
-      CBlob@ nearbyBlob;
-      
-      //Check if any blobs are within radius
-      if(map.getBlobsInRadius(this.getPosition(), map.tilesize, @nearbyBlobs)) {
-      
-        //Iterate through blob objects
-        for(u8 i = 0; i<nearbyBlobs.length; i++) {
+        //Obtain a reference to the map
+        CMap@ map = this.getMap();
         
-          //Keep a reference to this blob object
-          @nearbyBlob = nearbyBlobs[i];
+        //Create an array of vector offsets (clockwise)
+        Vec2f[] connectionOffsets = {Vec2f(0.0f, -map.tilesize), Vec2f(map.tilesize, 0.0f), Vec2f(0.0f, map.tilesize), Vec2f(-map.tilesize, 0.0f)};
+        
+        //Create an array of tag strings (clockwise)
+        string[] connectionTags = {"isConnectedUp", "isConnectedRight", "isConnectedDown", "isConnectedLeft"};
+        
+        //Create a blob handle
+        CBlob@ previousBlob;
+        
+        //Create a blob handle
+        CBlob@ nextBlob;
+        
+        //Iterate through all possible connections
+        for(u8 i=0; i<connectionOffsets.length; i++) {
+        
+          //Remove tag
+          this.Untag(connectionTags[i]);
+        
+          //Reference this blob first
+          @nextBlob = this;
           
-          //Check if blob is not this blob, tagged as conveyor and is placed
-          if(nearbyBlob !is this && nearbyBlob.hasTag("isConveyor") && nearbyBlob.hasTag("isPlaced")) {
+          //Set valid flag
+          bool nextIsValid = true;
+        
+          //Do at least once
+          do {
           
-            //Check if same type name
-            if(nearbyBlob.getName() == this.getName()) {
+            //Keep a reference to the previous segment
+            @previousBlob = nextBlob;
             
-              //Create a vector representing the relative displacement
-              Vec2f relativeDisplacement = nearbyBlob.getPosition() - this.getPosition();
+            //Retrieve the next segment in line
+            @nextBlob = map.getBlobAtPosition(previousBlob.getPosition() + connectionOffsets[i]);
+            
+            //Check if invalid blob reference
+            if(nextBlob is null) {
+            
+              //Update flag
+              nextIsValid = false;
               
-              //Check if displaced one tile to the right
-              if(relativeDisplacement.x == map.tilesize && relativeDisplacement.y == 0.0f) {
+            }
+            
+            //Otherwise, check if same type, tagged as conveyor, is placed, and faces the same direction
+            else if(
+                nextBlob.getName() == previousBlob.getName() 
+                && nextBlob.hasTag("isConveyor") 
+                && nextBlob.hasTag("isPlaced") 
+                && nextBlob.isFacingLeft() == previousBlob.isFacingLeft()
+              ) {
+            
+              //Set tag
+              previousBlob.Tag(connectionTags[i]);
+            
+              //Check if propagate flag
+              if(doPropagate) {
               
-                //Tag as connected to the right
-                this.Tag("isConnectedRight");
-              
-              }
-              
-              //Check if displaced one tile to the left
-              if(relativeDisplacement.x == - map.tilesize && relativeDisplacement.y == 0.0f) {
-              
-                //Tag as connected to the right
-                this.Tag("isConnectedLeft");
-              
-              }
-              
-              //Check if displaced one tile down
-              if(relativeDisplacement.y == map.tilesize && relativeDisplacement.x == 0.0f) {
-              
-                //Tag as connected to the right
-                this.Tag("isConnectedDown");
-              
-              }
-              
-              //Check if displaced one tile up
-              if(relativeDisplacement.y == -map.tilesize && relativeDisplacement.x == 0.0f) {
-              
-                //Tag as connected to the right
-                this.Tag("isConnectedUp");
-              
+                //Set animation frame number
+                nextBlob.getSprite().animation.frame = previousBlob.getSprite().animation.frame;
+                
               }
               
             }
-          
+            
+            //Otherwise
+            else {
+            
+              //Update flag
+              nextIsValid = false;
+              
+            }
+
           }
+
+          //Repeat if propagate flag and valid flag
+          while(doPropagate && nextIsValid);
           
         }
         
@@ -190,7 +205,7 @@ namespace Transports {
       
       //Finished
       return;
-    
+      
     }
     
     
@@ -218,18 +233,6 @@ namespace Transports {
       
       //Finished
       return;
-      
-    }
-    
-    
-    
-    void onDie(CBlob@ this) {
-    
-      //Obtain a reference to the map object
-      CMap@ map = this.getMap();
-      
-      //Set empty tile
-      map.server_SetTile(this.getPosition(), CMap::tile_empty);
       
     }
     

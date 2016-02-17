@@ -73,9 +73,9 @@ namespace Transports {
             //Check if blob is not this blob, not tagged as conveyor and is above
             //TODO: Maybe also exclude any static blobs in general
             if(nearbyBlob !is this && !nearbyBlob.hasTag("isConveyor") && relativeDisplacement.y <= 0.0f) {
-              
-              //If blob is tagged as touching
-              if(nearbyBlob.hasTag("isTouchingBeltConveyor")) {
+            
+              //If blob is tagged as touching, and touching this belt conveyor
+              if(nearbyBlob.hasTag("isTouchingBeltConveyor") && nearbyBlob.get_netid("isTouchingID") == this.getNetworkID()) {
                 
                 //Obtain a vector for the blob's current velocity
                 Vec2f currentVelocity = nearbyBlob.getVelocity();
@@ -110,34 +110,21 @@ namespace Transports {
                 //Determine what acceleration to apply (a = v / t)
                 Vec2f acceleration = (targetVelocity - currentVelocity) / (Transports::ConveyorVariables::TIME_FOR_TARGET_VELOCITY * getTicksASecond());
                 
-                //Add force impulse (F = m * a)
-                nearbyBlob.AddForce(acceleration * nearbyBlob.getMass());
+                //Determine blob's friction
+                Vec2f friction = Vec2f(nearbyBlob.getShape().getFriction() / getTicksASecond(), 0.0f);
                 
-              }
-            
-              /*
-              //If blob is not tagged as touching
-              if(!nearbyBlob.hasTag("isTouchingBeltConveyor")) {
-              
-                //Tag as touching
-                nearbyBlob.Tag("isTouchingBeltConveyor");
+                //Check if blob is moving faster than target velocity
+                if(targetVelocity.x - currentVelocity.x < 0.0f) {
                 
-                //Create a movement vector
-                Vec2f movement(2.0f, 0.0f);//Transports::ConveyorVariables::SLOW_VELOCITY * nearbyBlob.getMass()
-                
-                //Check if conveyor is facing left
-                if(isFacingLeft) {
-                
-                  //Set horizontal movement in left direction
-                  movement.x *= -1.0f;
-                
+                  //Change direction of friction
+                  friction.x *= -1.0f;
+                  
                 }
                 
-                //Add force
-                nearbyBlob.setVelocity(nearbyBlob.getVelocity() + movement);//AddForce(movement);
+                //Add force impulse (F = m * a)
+                nearbyBlob.AddForce((acceleration + friction) * nearbyBlob.getMass());
                 
               }
-              */
               
             }
             
@@ -156,35 +143,17 @@ namespace Transports {
     
     void onCollision(CBlob@ this, CBlob@ otherBlob, bool solid, Vec2f normal, Vec2f point1) {
     
-      //If this is tagged as placed, other is a valid blob, and not a conveyor
-      if(this.hasTag("isPlaced") && otherBlob !is null && !otherBlob.hasTag("isConveyor")) {
+      //If this is tagged as placed while other is a valid blob, not a conveyor, and above
+      if(this.hasTag("isPlaced") && otherBlob !is null && !otherBlob.hasTag("isConveyor") && normal.y > 0.0f) {
       
+        //Store this belt conveyor's ID
+        otherBlob.set_netid("isTouchingID", this.getNetworkID());
+        
         //Check if not tagged as touching
         if(!otherBlob.hasTag("isTouchingBeltConveyor")) {
       
           //Tag as touching
           otherBlob.Tag("isTouchingBeltConveyor");
-          
-          //Create a movement vector
-          //Vec2f acceleration(250.0f, 0.0f);//Transports::ConveyorVariables::SLOW_VELOCITY * otherBlob.getMass()
-          
-          //Check if conveyor is facing left
-          //if(this.isFacingLeft()) {
-          
-            //Set horizontal movement in left direction
-            //acceleration.x *= -1.0f;
-          
-          //}
-          
-          //Add force
-          //otherBlob.AddForce(acceleration);//otherBlob.setVelocity(otherBlob.getVelocity() + acceleration);//
-          
-        }
-        
-        //Otherwise, tagged as touching
-        else {
-        
-          //TODO: Add small force to compensate for friction
           
         }
         
