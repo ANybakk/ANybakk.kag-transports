@@ -1,5 +1,5 @@
 /*
- * Conveyor blob modes.
+ * Conveyor blob mode data.
  * 
  * Author: ANybakk
  */
@@ -20,7 +20,7 @@ namespace Transports {
     ConveyorBlobModeData() {
     
       mMode = Transports::ConveyorBlobMode::MODE_OFF;
-      mTargetVelocity = Vec2f(0.0, 0.0);
+      mTargetVelocity = Vec2f(0.0f, 0.0f);
       
     }
     

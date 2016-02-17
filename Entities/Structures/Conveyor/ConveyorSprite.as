@@ -4,7 +4,7 @@
  * Author: ANybakk
  */
 
-
+#include "ConveyorBlobConnectionData.as"
 
 namespace Transports {
 
@@ -57,35 +57,29 @@ namespace Transports {
       
         CBlob@ blob = this.getBlob();
         
-        if(blob.hasTag("isConnectedRight")) {
+        //Create a connection data object
+        Transports::ConveyorBlobConnectionData connectionData;
         
-          Vec2f screenBlobPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition());
-          Vec2f screenDirectionPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition() + Vec2f(4.0f, 0.0f));
-          GUI::DrawLine2D(screenBlobPosition, screenDirectionPosition, SColor(0xff00ff00) );
+        //Create a blob position vector
+        Vec2f screenBlobPosition;
+        
+        //Create a direction vector
+        Vec2f screenDirectionPosition;
+        
+        //Iterate through all possible connections
+        for(u8 i=0; i<Transports::ConveyorVariables::CONNECTION_DATA.length; i++) {
+        
+          //Keep connection data
+          connectionData = Transports::ConveyorVariables::CONNECTION_DATA[i];
           
-        }
-        
-        if(blob.hasTag("isConnectedLeft")) {
-        
-          Vec2f screenBlobPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition());
-          Vec2f screenDirectionPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition() + Vec2f(-4.0f, 0.0f));
-          GUI::DrawLine2D(screenBlobPosition, screenDirectionPosition, SColor(0xff00ff00) );
+          //Check if tagged with this connection name
+          if(blob.hasTag(connectionData.mName)) {
           
-        }
-        
-        if(blob.hasTag("isConnectedUp")) {
-        
-          Vec2f screenBlobPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition());
-          Vec2f screenDirectionPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition() + Vec2f(0.0f, -4.0f));
-          GUI::DrawLine2D(screenBlobPosition, screenDirectionPosition, SColor(0xff00ff00) );
-          
-        }
-        
-        if(blob.hasTag("isConnectedDown")) {
-        
-          Vec2f screenBlobPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition());
-          Vec2f screenDirectionPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition() + Vec2f(0.0f, 4.0f));
-          GUI::DrawLine2D(screenBlobPosition, screenDirectionPosition, SColor(0xff00ff00) );
+            screenBlobPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition());
+            screenDirectionPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition() + connectionData.mOffset / 2);
+            GUI::DrawLine2D(screenBlobPosition, screenDirectionPosition, SColor(0xff00ff00) );
+            
+          }
           
         }
         

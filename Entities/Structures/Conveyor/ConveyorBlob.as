@@ -6,6 +6,7 @@
 
 #include "ConveyorBlobMode.as";
 #include "ConveyorBlobDirection.as";
+#include "ConveyorBlobConnectionData.as"
 
 
 
@@ -54,11 +55,11 @@ namespace Transports {
     
     void onTick(CBlob@ this) {
       
-      //Update connections
-      updateConnections(this, false, false);
-      
       //Update direction
       updateDirection(this);
+      
+      //Update connections
+      updateConnections(this, false, false);
       
     }
     
@@ -89,11 +90,11 @@ namespace Transports {
       //Tag as placed
       this.Tag("isPlaced");
       
-      //Update connections
-      updateConnections(this, true, true);
-      
       //Update direction
       updateDirection(this);
+      
+      //Update connections
+      updateConnections(this, true, true);
       
       //Set mode to default
       this.set_u8("ConveyorBlobMode", Transports::ConveyorVariables::DEFAULT_ON_MODE);
@@ -114,7 +115,7 @@ namespace Transports {
      * Updates connection statuses for the blob (and any others of the same type in the same direction)
      * 
      * @param   doPropagate     whether to propagate linearly or not
-     * @param   doAnimationSync whether to synchronize animations (if propagating)
+     * @param   doAnimationSync whether to synchronize animations when propagating
      */
     void updateConnections(CBlob@ this, bool doPropagate=false, bool doAnimationSync=false) {
       
@@ -124,23 +125,23 @@ namespace Transports {
         //Obtain a reference to the map
         CMap@ map = this.getMap();
         
-        //Create an array of vector offsets (clockwise)
-        Vec2f[] connectionOffsets = {Vec2f(0.0f, -map.tilesize), Vec2f(map.tilesize, 0.0f), Vec2f(0.0f, map.tilesize), Vec2f(-map.tilesize, 0.0f)};
-        
-        //Create an array of tag strings (clockwise)
-        string[] connectionTags = {"isConnectedUp", "isConnectedRight", "isConnectedDown", "isConnectedLeft"};
-        
         //Create a blob handle
         CBlob@ previousBlob;
         
         //Create a blob handle
         CBlob@ nextBlob;
         
-        //Iterate through all possible connections
-        for(u8 i=0; i<connectionOffsets.length; i++) {
+        //Create a connection data object
+        Transports::ConveyorBlobConnectionData connectionData;
         
+        //Iterate through all possible connections
+        for(u8 i=0; i<Transports::ConveyorVariables::CONNECTION_DATA.length; i++) {
+        
+          //Keep connection data
+          connectionData = Transports::ConveyorVariables::CONNECTION_DATA[i];
+          
           //Remove tag
-          this.Untag(connectionTags[i]);
+          this.Untag(connectionData.mName);
         
           //Reference this blob first
           @nextBlob = this;
@@ -155,7 +156,7 @@ namespace Transports {
             @previousBlob = nextBlob;
             
             //Retrieve the next segment in line
-            @nextBlob = map.getBlobAtPosition(previousBlob.getPosition() + connectionOffsets[i]);
+            @nextBlob = map.getBlobAtPosition(previousBlob.getPosition() + connectionData.mOffset);
             
             //Check if invalid blob reference
             if(nextBlob is null) {
@@ -165,19 +166,19 @@ namespace Transports {
               
             }
             
-            //Otherwise, check if same type, tagged as conveyor, is placed, and faces the same direction
+            //Otherwise, check if same type, tagged as conveyor, is placed, and same direction
             else if(
                 nextBlob.getName() == previousBlob.getName() 
                 && nextBlob.hasTag("isConveyor") 
                 && nextBlob.hasTag("isPlaced") 
-                && nextBlob.isFacingLeft() == previousBlob.isFacingLeft()
+                && nextBlob.get_u8("ConveyorBlobDirection") == previousBlob.get_u8("ConveyorBlobDirection")
               ) {
             
               //Set tag
-              previousBlob.Tag(connectionTags[i]);
+              previousBlob.Tag(connectionData.mName);
             
               //Check if propagate flag
-              if(doPropagate) {
+              if(doAnimationSync) {
               
                 //Set animation frame number
                 nextBlob.getSprite().animation.frame = previousBlob.getSprite().animation.frame;
