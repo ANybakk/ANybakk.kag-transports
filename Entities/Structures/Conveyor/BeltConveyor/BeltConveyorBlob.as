@@ -68,6 +68,7 @@ namespace Transports {
             @nearbyBlob = nearbyBlobs[i];
             
             //Keep relative displacement
+            //TODO: Not a good enough check. Player characters are larger than 8x8, resulting in an unexpected y-component. Characters that fall off the edge of the track is still pushed because of this.
             relativeDisplacement = nearbyBlob.getPosition() - this.getPosition();
             
             //Check if blob is not this blob, not tagged as conveyor and is above
@@ -104,26 +105,52 @@ namespace Transports {
                 
                   //Set horizontal velocity in left direction
                   targetVelocity.x *= -1.0f;
+                  
+                  //Set target velocity or current, whichever is higher (to the left)
+                  nearbyBlob.setVelocity(Vec2f(Maths::Min(targetVelocity.x, currentVelocity.x), currentVelocity.y));
                 
                 }
                 
-                //Determine what acceleration to apply (a = v / t)
-                Vec2f acceleration = (targetVelocity - currentVelocity) / (Transports::ConveyorVariables::TIME_FOR_TARGET_VELOCITY * getTicksASecond());
+                //Otherwise, facing right
+                else {
                 
-                //Determine blob's friction
-                Vec2f friction = Vec2f(nearbyBlob.getShape().getFriction() / getTicksASecond(), 0.0f);
-                
-                //Check if blob is moving faster than target velocity
-                if(targetVelocity.x - currentVelocity.x < 0.0f) {
-                
-                  //Change direction of friction
-                  friction.x *= -1.0f;
+                  //Set target velocity or current, whichever is higher (to the right)
+                  nearbyBlob.setVelocity(Vec2f(Maths::Max(targetVelocity.x, currentVelocity.x), currentVelocity.y));
                   
                 }
                 
-                //Add force impulse (F = m * a)
-                nearbyBlob.AddForce((acceleration + friction) * nearbyBlob.getMass());
+                /*
+                //Determine what acceleration to apply (a = v / t)
+                Vec2f acceleration = (targetVelocity - currentVelocity) / (Transports::ConveyorVariables::TIME_FOR_TARGET_VELOCITY * getTicksASecond());
                 
+                //Determine what force to apply (F = m * a)
+                Vec2f force = acceleration * nearbyBlob.getMass();
+                
+                //Determine what friction countering force to apply
+                Vec2f frictionForce = Vec2f(0.0f, 0.0f);
+                
+                //Check if velocity is 0
+                if(currentVelocity.x == 0.0f) {
+                
+                  //Determine the friction between the blob and conveyor segment
+                  f32 frictionFactor = Maths::Sqrt(nearbyBlob.getShape().getFriction() * this.getShape().getFriction());
+                  
+                  //Determine the force of friction that is necessary to surpass to initiate movement (Fs = Fn * us, Fn = m * g * cos(a))
+                  frictionForce.x = (nearbyBlob.getMass() * sv_gravity * Maths::Cos(0.0f) * frictionFactor) / getTicksASecond() + 0.1f;
+                
+                  //Check if conveyor is facing left
+                  if(isFacingLeft) {
+                  
+                    //Set left direction
+                    frictionForce.x *= -1.0f;
+                  
+                  }
+                
+                }
+                
+                //Add force impulses
+                nearbyBlob.AddForce(force + frictionForce);
+                */
               }
               
             }
@@ -155,6 +182,21 @@ namespace Transports {
           //Tag as touching
           otherBlob.Tag("isTouchingBeltConveyor");
           
+          /*
+          //Obtain friction value
+          f32 friction = otherBlob.getShape().getFriction();
+          
+          //Check if conveyor is facing left
+          if(this.isFacingLeft()) {
+          
+            //Set left direction
+            friction *= -1.0f;
+          
+          }
+          
+          //Add force equal to friction (movement starts)
+          otherBlob.AddForce(Vec2f(friction + 0.1f, 0.0f));
+          */
         }
         
       }
