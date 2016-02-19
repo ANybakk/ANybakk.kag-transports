@@ -56,7 +56,7 @@ namespace Transports {
           CBlob@ nearbyBlob;
           
           //Create a vector representing the relative displacement
-          Vec2f relativeDisplacement;
+          f32 relativeAngle;
         
           //Determine if facing left
           bool isFacingLeft = this.isFacingLeft();
@@ -67,13 +67,12 @@ namespace Transports {
             //Keep a reference to this blob object
             @nearbyBlob = nearbyBlobs[i];
             
-            //Keep relative displacement
-            //TODO: Not a good enough check. Player characters are larger than 8x8, resulting in an unexpected y-component. Characters that fall off the edge of the track is still pushed because of this.
-            relativeDisplacement = nearbyBlob.getPosition() - this.getPosition();
+            //Keep relative angle
+            relativeAngle = (nearbyBlob.getPosition() - this.getPosition()).Angle();
             
-            //Check if blob is not this blob, not tagged as conveyor and is above
+            //Check if blob is not this blob, not tagged as conveyor and is above (within a 90 degree angle)
             //TODO: Maybe also exclude any static blobs in general
-            if(nearbyBlob !is this && !nearbyBlob.hasTag("isConveyor") && relativeDisplacement.y <= 0.0f) {
+            if(nearbyBlob !is this && !nearbyBlob.hasTag("isConveyor") && (relativeAngle >= 45.0f && relativeAngle <= 135.0f)) {
             
               //If blob is tagged as touching, and touching this belt conveyor
               if(nearbyBlob.hasTag("isTouchingBeltConveyor") && nearbyBlob.get_netid("isTouchingID") == this.getNetworkID()) {
