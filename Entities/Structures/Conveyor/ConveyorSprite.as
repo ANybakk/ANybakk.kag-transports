@@ -61,7 +61,7 @@ namespace Transports {
         Transports::ConveyorBlobConnectionData connectionData;
         
         //Create a blob position vector
-        Vec2f screenBlobPosition;
+        Vec2f screenBlobPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition());
         
         //Create a direction vector
         Vec2f screenDirectionPosition;
@@ -75,9 +75,8 @@ namespace Transports {
           //Check if tagged with this connection name
           if(blob.hasTag(connectionData.mName)) {
           
-            screenBlobPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition());
             screenDirectionPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition() + connectionData.mOffset / 2);
-            GUI::DrawLine2D(screenBlobPosition, screenDirectionPosition, SColor(0xff00ff00) );
+            GUI::DrawLine2D(screenBlobPosition, screenDirectionPosition, SColor(0xff00ff00));
             
           }
           

@@ -70,12 +70,12 @@ namespace Transports {
             //Keep relative angle
             relativeAngle = (nearbyBlob.getPosition() - this.getPosition()).Angle();
             
-            //Check if blob is not this blob, not tagged as conveyor and is above (within a 90 degree angle)
+            //Check if blob is not this blob, not tagged as conveyor and is above (within a 120 degree angle, which seems enough for most objects)
             //TODO: Maybe also exclude any static blobs in general
-            if(nearbyBlob !is this && !nearbyBlob.hasTag("isConveyor") && (relativeAngle >= 45.0f && relativeAngle <= 135.0f)) {
+            if(nearbyBlob !is this && !nearbyBlob.hasTag("isConveyor") && (relativeAngle >= 30.0f && relativeAngle <= 150.0f)) {
             
               //If blob is tagged as touching, and touching this belt conveyor
-              if(nearbyBlob.hasTag("isTouchingBeltConveyor") && nearbyBlob.get_netid("isTouchingID") == this.getNetworkID()) {
+              if(/*nearbyBlob.hasTag("isTouchingBeltConveyor") && */nearbyBlob.get_netid("isTouchingID") == this.getNetworkID()) {
                 
                 //Obtain a vector for the blob's current velocity
                 Vec2f currentVelocity = nearbyBlob.getVelocity();
@@ -118,38 +118,6 @@ namespace Transports {
                   
                 }
                 
-                /*
-                //Determine what acceleration to apply (a = v / t)
-                Vec2f acceleration = (targetVelocity - currentVelocity) / (Transports::ConveyorVariables::TIME_FOR_TARGET_VELOCITY * getTicksASecond());
-                
-                //Determine what force to apply (F = m * a)
-                Vec2f force = acceleration * nearbyBlob.getMass();
-                
-                //Determine what friction countering force to apply
-                Vec2f frictionForce = Vec2f(0.0f, 0.0f);
-                
-                //Check if velocity is 0
-                if(currentVelocity.x == 0.0f) {
-                
-                  //Determine the friction between the blob and conveyor segment
-                  f32 frictionFactor = Maths::Sqrt(nearbyBlob.getShape().getFriction() * this.getShape().getFriction());
-                  
-                  //Determine the force of friction that is necessary to surpass to initiate movement (Fs = Fn * us, Fn = m * g * cos(a))
-                  frictionForce.x = (nearbyBlob.getMass() * sv_gravity * Maths::Cos(0.0f) * frictionFactor) / getTicksASecond() + 0.1f;
-                
-                  //Check if conveyor is facing left
-                  if(isFacingLeft) {
-                  
-                    //Set left direction
-                    frictionForce.x *= -1.0f;
-                  
-                  }
-                
-                }
-                
-                //Add force impulses
-                nearbyBlob.AddForce(force + frictionForce);
-                */
               }
               
             }
@@ -171,32 +139,17 @@ namespace Transports {
     
       //If this is tagged as placed while other is a valid blob, not a conveyor, and above
       if(this.hasTag("isPlaced") && otherBlob !is null && !otherBlob.hasTag("isConveyor") && normal.y > 0.0f) {
-      
-        //Store this belt conveyor's ID
+        
         otherBlob.set_netid("isTouchingID", this.getNetworkID());
         
         //Check if not tagged as touching
-        if(!otherBlob.hasTag("isTouchingBeltConveyor")) {
+        //if(!otherBlob.hasTag("isTouchingBeltConveyor")) {
       
           //Tag as touching
-          otherBlob.Tag("isTouchingBeltConveyor");
+          //otherBlob.Tag("isTouchingBeltConveyor");
           
-          /*
-          //Obtain friction value
-          f32 friction = otherBlob.getShape().getFriction();
           
-          //Check if conveyor is facing left
-          if(this.isFacingLeft()) {
-          
-            //Set left direction
-            friction *= -1.0f;
-          
-          }
-          
-          //Add force equal to friction (movement starts)
-          otherBlob.AddForce(Vec2f(friction + 0.1f, 0.0f));
-          */
-        }
+        //}
         
       }
       
@@ -208,7 +161,8 @@ namespace Transports {
     
     
     void onEndCollision(CBlob@ this, CBlob@ otherBlob) {
-    
+      
+      /*
       if(otherBlob !is null) {
         
         //Determine if other blob is moving upwards
@@ -223,6 +177,7 @@ namespace Transports {
         }
       
       }
+      */
       
       //Finished
       return;
