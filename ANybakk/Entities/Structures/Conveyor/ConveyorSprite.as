@@ -4,6 +4,7 @@
  * Author: ANybakk
  */
 
+#include "StructureSprite.as";
 #include "ConveyorBlobConnectionData.as"
 
 namespace Transports {
@@ -17,6 +18,8 @@ namespace Transports {
      */
     void onInit(CSprite@ this) {
       
+      Transports::StructureSprite::onInit(this);
+      
       //Finished
       return;
       
@@ -28,20 +31,11 @@ namespace Transports {
      * Tick event function
      */
     void onTick(CSprite@ this) {
-
-      //Obtain a reference to the blob object
-      CBlob@ blob = this.getBlob();
       
-      //Check if tagged as recently placed
-      if(blob.hasTag("wasPlaced")) {
+      Transports::StructureSprite::onTick(this);
       
-        //Play a sound
-        this.PlaySound("/build_door.ogg");
-        
-        //Remove flag
-        blob.Untag("wasPlaced");
-        
-      }
+      //Finished
+      return;
       
     }
 

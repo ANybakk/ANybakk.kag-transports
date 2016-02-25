@@ -37,6 +37,9 @@ namespace Transports {
     
       Transports::ConveyorBlob::onTick(this);
       
+      //Update direction
+      updateDirection(this);
+      
       //Retrieve current mode
       u8 currentMode = this.get_u8("ConveyorBlobMode");
       
@@ -140,6 +143,7 @@ namespace Transports {
       //If this is tagged as placed while other is a valid blob, not a conveyor, and above
       if(this.hasTag("isPlaced") && otherBlob !is null && !otherBlob.hasTag("isConveyor") && normal.y > 0.0f) {
         
+        //Store ID of segment
         otherBlob.set_netid("isTouchingID", this.getNetworkID());
         
         //Check if not tagged as touching
@@ -190,6 +194,9 @@ namespace Transports {
     
       Transports::ConveyorBlob::onSetStatic(this, isStatic);
       
+      //Update direction
+      updateDirection(this);
+        
       //Check if recently placed
       if(this.hasTag("wasPlaced")) {
       
@@ -227,11 +234,46 @@ namespace Transports {
     
     void onDie(CBlob@ this) {
     
-      //Obtain a reference to the map object
-      CMap@ map = this.getMap();
+      Transports::ConveyorBlob::onDie(this);
+    
+      //Check if placed
+      if(this.hasTag("isPlaced")) {
       
-      //Set empty tile
-      map.server_SetTile(this.getPosition(), CMap::tile_empty);
+        //Obtain a reference to the map object
+        CMap@ map = this.getMap();
+        
+        //Set empty tile
+        map.server_SetTile(this.getPosition(), CMap::tile_empty);
+        
+      }
+      
+    }
+    
+    
+    
+    /**
+     * Updates direction based on blob facing direction
+     */
+    void updateDirection(CBlob@ this) {
+    
+      //Check if facing left
+      if(this.isFacingLeft()) {
+      
+        //Set direction counter-clockwise
+        this.set_u8("ConveyorBlobDirection", Transports::ConveyorBlobDirection::DIRECTION_COUNTERCLOCKWISE);
+        
+      }
+      
+      //Otherwise, is facing right
+      else {
+      
+        //Set direction clockwise
+        this.set_u8("ConveyorBlobDirection", Transports::ConveyorBlobDirection::DIRECTION_CLOCKWISE);
+        
+      }
+      
+      //Finished
+      return;
       
     }
     

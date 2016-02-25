@@ -25,7 +25,9 @@ namespace Transports {
       Transports::ConveyorSprite::onInit(this);
       
       CBlob@ blob = this.getBlob();
-    
+      
+      blob.set_u32("lastRunningSoundTime", getGameTime());
+      
       //Set default animation state (conveyor is not placed yet)
       this.SetAnimation("default");
       
@@ -55,6 +57,31 @@ namespace Transports {
       
       //Update animation
       updateAnimation(this);
+    
+      //Obtain a reference to the blob object
+      CBlob@ blob = this.getBlob();
+      
+      //Retrieve time variable for when the running sound was last played
+      u32 lastRunningSoundTime = blob.get_u32("lastRunningSoundTime");
+      
+      //Check if more than 0.68 seconds have passed
+      if(getGameTime() - lastRunningSoundTime >= 0.68 * getTicksASecond()) {
+  
+        //Retrieve current blob mode
+        u8 blobMode = blob.get_u8("ConveyorBlobMode");
+        
+        //Check if mode is slow
+        if(blobMode == Transports::ConveyorBlobMode::MODE_SLOW) {
+        
+          //Play running sound
+          //this.PlaySound("BeltConveyorSlow.ogg");
+          
+          //Update time variable
+          blob.set_u32("lastRunningSoundTime", getGameTime());
+          
+        }
+        
+      }
       
     }
     
