@@ -69,6 +69,66 @@ namespace ANybakk {
     
     
     
+    /**
+     * Propels another blob upwards according to mode data rules
+     */
+    void propelUp(CBlob@ this, CBlob@ otherBlob) {
+    
+      //Create a vector for target velocity
+      Vec2f targetVelocity = ANybakk::ConveyorBlob::getModeData(this).mTargetVelocity;
+      
+      //Set velocity upwards
+      otherBlob.setVelocity(Vec2f(0.0f, -targetVelocity.y));
+      
+    }
+    
+    
+    
+    /**
+     * Propels another blob rightwards according to mode data rules
+     */
+    void propelRight(CBlob@ this, CBlob@ otherBlob) {
+    
+      //Create a vector for target velocity
+      Vec2f targetVelocity = ANybakk::ConveyorBlob::getModeData(this).mTargetVelocity;
+      
+      //Set velocity rightwards
+      otherBlob.setVelocity(Vec2f(targetVelocity.x, 0.0f));
+      
+    }
+    
+    
+    
+    /**
+     * Propels another blob downwards according to mode data rules
+     */
+    void propelDown(CBlob@ this, CBlob@ otherBlob) {
+    
+      //Create a vector for target velocity
+      Vec2f targetVelocity = ANybakk::ConveyorBlob::getModeData(this).mTargetVelocity;
+      
+      ///Set velocity downwards
+      otherBlob.setVelocity(Vec2f(0.0f, targetVelocity.y));
+      
+    }
+    
+    
+    
+    /**
+     * Propels another blob leftwards according to mode data rules
+     */
+    void propelLeft(CBlob@ this, CBlob@ otherBlob) {
+    
+      //Create a vector for target velocity
+      Vec2f targetVelocity = ANybakk::ConveyorBlob::getModeData(this).mTargetVelocity;
+      
+      //Set velocity leftwards
+      otherBlob.setVelocity(Vec2f(-targetVelocity.x, 0.0f));
+      
+    }
+    
+    
+    
   }
   
 }

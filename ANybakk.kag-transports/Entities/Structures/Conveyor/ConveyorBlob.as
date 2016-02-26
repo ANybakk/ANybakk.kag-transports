@@ -456,6 +456,39 @@ namespace ANybakk {
     
     
     
+    /**
+     * Returns the mode data object depending on whatever mode is currently active
+     */
+    ConveyorBlobModeData getModeData(CBlob@ this) {
+    
+      //Create variable
+      ConveyorBlobModeData result;
+    
+      //Retrieve current mode
+      u8 currentMode = this.get_u8("ConveyorBlobMode");
+      
+      //Iterate through modes
+      for(u8 i=0; i<ANybakk::ConveyorVariables::MODE_DATA.length; i++) {
+      
+        //Check if current mode
+        if(ANybakk::ConveyorVariables::MODE_DATA[i].mMode == currentMode) {
+        
+          //Keep target velocity vector
+          result = ANybakk::ConveyorVariables::MODE_DATA[i];
+          
+          //End loop
+          break;
+          
+        }
+      
+      }
+      
+      return result;
+      
+    }
+    
+    
+    
   }
   
 }

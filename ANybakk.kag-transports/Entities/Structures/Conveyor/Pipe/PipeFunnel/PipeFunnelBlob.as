@@ -63,7 +63,7 @@ namespace ANybakk {
     
     
     bool doesCollideWithBlob(CBlob@ this, CBlob@ other) {
-    
+    /*
       //Determine relative displacement 
       Vec2f relativeDisplacement = other.getPosition() - this.getPosition();
       
@@ -104,101 +104,32 @@ namespace ANybakk {
       
       //Finished, return false
       return false;
-      
+      */return false;
     }
+    
+    
     
     void onCollision(CBlob@ this, CBlob@ otherBlob, bool solid, Vec2f normal, Vec2f point1) {
       
-      //Check if can convey and meets the collision criteria
-      if(canConvey(this, otherBlob)
-        && doesCollideWithBlob(this, otherBlob)//COMMENT: Apparently, onCollision is always called
-      ) {
+      //Check if can convey and object not already in a pipe
+      if(canConvey(this, otherBlob) && !otherBlob.hasTag("isInPipe")) {
       
         //Retrieve current orientation
         u16 orientation = this.get_u16("StructureBlobOrientation");
         
-        //Determine the angle to the collision point
-        f32 angle = (point1 - this.getPosition()).getAngle();
+        //Reverse normal vector so that what we get is relative to this
+        normal.x *= -1;
+        normal.y *= -1;
         
-        //Check if collision from the right direction
+        //Check if not already entered this pipe (can happen when pipe turns back close enough) and collision from the right direction
         if(
-          (orientation == ANybakk::StructureBlobOrientation::ORIENTATION_UP && angle < 135.0f && angle >= 45.0f)
-          || (orientation == ANybakk::StructureBlobOrientation::ORIENTATION_RIGHT && angle < 45.0f && angle >= 315.0f)
-          || (orientation == ANybakk::StructureBlobOrientation::ORIENTATION_DOWN && angle < 315.0f && angle >= 225.0f)
-          || (orientation == ANybakk::StructureBlobOrientation::ORIENTATION_LEFT && angle < 225.0f && angle >= 135.0f)
+          (orientation == ANybakk::StructureBlobOrientation::ORIENTATION_UP && normal.y < 0.0f)
+          || (orientation == ANybakk::StructureBlobOrientation::ORIENTATION_RIGHT && normal.x > 0.0f)
+          || (orientation == ANybakk::StructureBlobOrientation::ORIENTATION_DOWN && normal.y > 0.0f)
+          || (orientation == ANybakk::StructureBlobOrientation::ORIENTATION_LEFT && normal.x < 0.0f)
         ) {
-      
-          //Store pipe ID
-          otherBlob.set_netid("enteredPipeID", this.getNetworkID());
-          
-          //Create a displacement vector
-          Vec2f displacement = Vec2f(0.0f, 0.0f);
-          
-          //Retrieve current orientation
-          u16 orientation = this.get_u16("StructureBlobOrientation");
         
-          //Check if orientation is up
-          if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_UP) {
-          
-            //Set displacement in the y direction to 1.0 from edge
-            displacement.y = -this.getShape().getHeight() + 1.0f;
-            
-            //Set displacement in the x direction so that blob lines up
-            displacement.x = 0.0f;
-            
-          }
-          
-          //Check if orientation is right
-          else if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_RIGHT) {
-          
-            //set displacement in the x direction to -1.0 from edge
-            displacement.x = this.getShape().getWidth() - 1.0f;
-            
-            //Set displacement in the y direction so that blob lines up
-            displacement.y = 0.0f;
-            
-          }
-          
-          //Check if orientation is down
-          else if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_DOWN) {
-          
-            //set displacement in the y direction to -1.0 from edge
-            displacement.y = this.getShape().getHeight() - 1.0f;
-            
-            //Set displacement in the x direction so that blob lines up
-            displacement.x = 0.0f;
-            
-          }
-          
-          //Check if orientation is left
-          else if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_LEFT) {
-          
-            //set displacement in the x direction to 1.0 from edge
-            displacement.x = -this.getShape().getWidth() + 1.0f;
-            
-            //Set displacement in the y direction so that blob lines up
-            displacement.y = 0.0f;
-            
-          }
-          
-          //Move object past collision barrier
-          otherBlob.setPosition(this.getPosition());// + displacement);
-          
-          //Obtain a reference to the other blob's shape object
-          CShape@ otherShape = otherBlob.getShape();
-          
-          //Disable collisions
-          //otherShape.checkCollisionsAgain = false;
-          //otherShape.getConsts().mapCollisions = false;
-          
-          //Disable gravity for object
-          otherShape.SetGravityScale(0.0f);
-          
-          //Set entered pipe flag
-          this.Tag("wasEntered");
-          
-          //Set in pipe flag
-          otherBlob.Tag("isInPipe");
+          absorb(this, otherBlob);
           
         }
         
@@ -226,34 +157,6 @@ namespace ANybakk {
       
       //Check if any blobs are overlapping
       if(this.getOverlapping(@overlappingBlobs)) {
-      
-        //Retrieve current mode
-        u8 currentMode = this.get_u8("ConveyorBlobMode");
-        
-        //Create a vector for target velocity
-        Vec2f targetVelocity = Vec2f(0.0f, 0.0f);
-        
-        //Iterate through modes
-        for(u8 i=0; i<ANybakk::ConveyorVariables::MODE_DATA.length; i++) {
-        
-          //Check if current mode
-          if(ANybakk::ConveyorVariables::MODE_DATA[i].mMode == currentMode) {
-          
-            //Keep target velocity vector
-            targetVelocity = ANybakk::ConveyorVariables::MODE_DATA[i].mTargetVelocity;
-            
-            //End loop
-            break;
-            
-          }
-        
-        }
-        
-        //Create directional velocity vectors
-        Vec2f propelUp(0.0f, -targetVelocity.y);
-        Vec2f propelRight(targetVelocity.x, 0.0f);
-        Vec2f propelDown(0.0f, targetVelocity.y);
-        Vec2f propelLeft(-targetVelocity.x, 0.0f);
         
         //Retrieve current orientation
         u16 orientation = this.get_u16("StructureBlobOrientation");
@@ -285,56 +188,7 @@ namespace ANybakk {
             //Determine if this blob entered the pipe through this segment
             //bool enteredThis = (overlappingBlob.get_netid("enteredPipeID") == this.getNetworkID());
             
-            //Retrieve current velocity of object
-            Vec2f currentVelocity = overlappingBlob.getVelocity();
-            
-            //Set moving direction flags
-            bool isMovingUp = currentVelocity.y < 0.0f;
-            bool isMovingRight = currentVelocity.x > 0.0f;
-            bool isMovingDown = currentVelocity.y > 0.0f;
-            bool isMovingLeft = currentVelocity.x < 0.0f;
-            
-            //Check if orientation is up or down
-            if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_UP || orientation == ANybakk::StructureBlobOrientation::ORIENTATION_DOWN) {
-            
-              //Check if moving up
-              if(isMovingUp) {
-              
-                //Propel up
-                overlappingBlob.setVelocity(propelUp);
-                
-              }
-              
-              //Otherwise, check if moving down
-              else if(isMovingDown) {
-              
-                //Propel down
-                overlappingBlob.setVelocity(propelDown);
-                
-              }
-              
-            }
-            
-            //Check if orientation is right or left
-            else if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_RIGHT || orientation == ANybakk::StructureBlobOrientation::ORIENTATION_LEFT) {
-            
-              //Check if moving right
-              if(isMovingRight) {
-              
-                //Propel right
-                overlappingBlob.setVelocity(propelRight);
-                
-              }
-              
-              //Otherwise, check if moving left
-              else if(isMovingLeft) {
-              
-                //Propel left
-                overlappingBlob.setVelocity(propelLeft);
-                
-              }
-              
-            }
+            propel(this, overlappingBlob);
             
           }
           
@@ -404,6 +258,7 @@ namespace ANybakk {
     bool canConvey(CBlob@ this, CBlob@ otherBlob) {
     
       return this.hasTag("isPlaced")
+        && this.get_u8("ConveyorBlobMode") != ANybakk::ConveyorBlobMode::MODE_OFF
         && otherBlob !is null 
         && !otherBlob.hasTag("isStructure") 
         && (
@@ -419,6 +274,211 @@ namespace ANybakk {
           || otherBlob.getName() == "sponge"
         );
           
+    }
+    
+    
+    
+    /**
+     * Absorbs a blob
+     */
+    void absorb(CBlob@ this, CBlob@ otherBlob) {
+    
+      //Retrieve current orientation
+      u16 orientation = this.get_u16("StructureBlobOrientation");
+      
+      //Check if orientation is up
+      if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_UP) {
+      
+        //Absorb
+        absorbTop(this, otherBlob);
+        
+      }
+      
+      //Check if orientation is right
+      else if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_RIGHT) {
+      
+        //Absorb
+        absorbRight(this, otherBlob);
+        
+      }
+      
+      //Check if orientation is down
+      else if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_DOWN) {
+      
+        //Absorb
+        absorbBottom(this, otherBlob);
+        
+      }
+      
+      //Check if orientation is left
+      else if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_LEFT) {
+      
+        //Absorb
+        absorbLeft(this, otherBlob);
+        
+      }
+      
+    }
+    
+    
+    
+    /**
+     * Absorbs a blob, top-side
+     */
+    void absorbTop(CBlob@ this, CBlob@ otherBlob) {
+    
+      //Move other 1.0 inside
+      otherBlob.setPosition(this.getPosition() + Vec2f(0.0f, -this.getShape().getHeight() / 2 + 1.0f));
+      
+      //Propel down
+      ANybakk::PipeBlob::propelDown(this, otherBlob);
+      
+      //Call common handler
+      onAbsorbed(this, otherBlob);
+      
+    }
+    
+    
+    
+    /**
+     * Absorbs a blob, right-side
+     */
+    void absorbRight(CBlob@ this, CBlob@ otherBlob) {
+    
+      //Move other 1.0 inside
+      otherBlob.setPosition(this.getPosition() + Vec2f(this.getShape().getWidth() / 2 - 1.0f, 0.0f));
+      
+      //Propel left
+      ANybakk::PipeBlob::propelLeft(this, otherBlob);
+      
+      //Call common handler
+      onAbsorbed(this, otherBlob);
+      
+    }
+    
+    
+    
+    /**
+     * Absorbs a blob, bottom-side
+     */
+    void absorbBottom(CBlob@ this, CBlob@ otherBlob) {
+    
+      //Move other 1.0 inside
+      otherBlob.setPosition(this.getPosition() + Vec2f(0.0f, this.getShape().getHeight() / 2 - 1.0f));
+      
+      //Propel up
+      ANybakk::PipeBlob::propelUp(this, otherBlob);
+      
+      //Call common handler
+      onAbsorbed(this, otherBlob);
+      
+    }
+    
+    
+    
+    /**
+     * Absorbs a blob, left-side
+     */
+    void absorbLeft(CBlob@ this, CBlob@ otherBlob) {
+    
+      //Move other 1.0 inside
+      otherBlob.setPosition(this.getPosition() + Vec2f(-this.getShape().getWidth() / 2 + 1.0f, 0.0f));
+      
+      //Propel right
+      ANybakk::PipeBlob::propelRight(this, otherBlob);
+      
+      //Call common handler
+      onAbsorbed(this, otherBlob);
+      
+    }
+    
+    
+    
+    /**
+     * Handler for when a blob has been absorbed
+     */
+    void onAbsorbed(CBlob@ this, CBlob@ otherBlob) {
+      
+      //Store pipe ID
+      otherBlob.set_netid("enteredPipeID", this.getNetworkID());
+      
+      //Obtain a reference to the other blob's shape object
+      CShape@ otherShape = otherBlob.getShape();
+      
+      //Disable collisions
+      //otherShape.checkCollisionsAgain = false;
+      otherShape.getConsts().mapCollisions = false;
+      otherShape.getConsts().collidable = false;
+      
+      //Disable gravity for object
+      otherShape.SetGravityScale(0.0f);
+      
+      //Set invisible
+      //otherBlob.getSprite().SetVisible(true);
+      
+      //Set entered pipe flag
+      this.Tag("wasEntered");
+      
+      //Set in pipe flag
+      otherBlob.Tag("isInPipe");
+      
+    }
+    
+    
+    
+    /**
+     * Propels a blob
+     */
+    void propel(CBlob@ this, CBlob@ otherBlob) {
+    
+      //Retrieve current orientation
+      u16 orientation = this.get_u16("StructureBlobOrientation");
+    
+      //Retrieve current velocity of object
+      Vec2f currentVelocity = otherBlob.getVelocity();
+      
+      //Check if orientation is up or down
+      if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_UP || orientation == ANybakk::StructureBlobOrientation::ORIENTATION_DOWN) {
+      
+        //Check if moving up
+        if(currentVelocity.y < 0.0f) {
+        
+          //Propel up
+          ANybakk::PipeBlob::propelUp(this, otherBlob);
+          
+        }
+        
+        //Otherwise, check if moving down
+        else if(currentVelocity.y >= 0.0f) {
+        
+          //Propel down
+          ANybakk::PipeBlob::propelDown(this, otherBlob);
+          
+        }
+        
+      }
+      
+      //Check if orientation is right or left
+      else if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_RIGHT || orientation == ANybakk::StructureBlobOrientation::ORIENTATION_LEFT) {
+      
+        //Check if moving right
+        if(currentVelocity.x > 0.0f) {
+        
+          //Propel right
+          ANybakk::PipeBlob::propelRight(this, otherBlob);
+          
+        }
+        
+        //Otherwise, check if moving left
+        else if(currentVelocity.x <= 0.0f) {
+        
+          //Propel left
+          ANybakk::PipeBlob::propelLeft(this, otherBlob);
+          
+        }
+        
+      }
+      
     }
     
     

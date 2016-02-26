@@ -4,6 +4,7 @@
  * Author: ANybakk
  */
 
+#include "EntityBlob.as";
 
 
 namespace ANybakk {
@@ -13,6 +14,8 @@ namespace ANybakk {
 
 
     void onInit(CBlob@ this) {
+      
+      ANybakk::EntityBlob::onInit(this);
       
       setTags(this);
       

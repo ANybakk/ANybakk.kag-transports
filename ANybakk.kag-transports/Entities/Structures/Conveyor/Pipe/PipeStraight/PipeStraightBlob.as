@@ -37,8 +37,16 @@ namespace ANybakk {
     
       ANybakk::PipeBlob::onTick(this);
       
-      //Propel any overlapping blobs
-      ANybakk::PipeFunnelBlob::propelOverlapping(this);
+      //Retrieve current mode
+      u8 currentMode = this.get_u8("ConveyorBlobMode");
+      
+      //Check if mode is not off
+      if(currentMode != ANybakk::ConveyorBlobMode::MODE_OFF) {
+      
+        //Propel any overlapping blobs
+        ANybakk::PipeFunnelBlob::propelOverlapping(this);
+        
+      }
       
     }
     
