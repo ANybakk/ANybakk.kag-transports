@@ -5,6 +5,9 @@
  */
 
 #include "ConveyorBlob.as";
+#include "PipeableVariables.as"; //Required for PipeableBlob.as
+#include "PipeableBlob.as";
+#include "PipeableSprite.as";
 
 
 
@@ -48,6 +51,17 @@ namespace ANybakk {
     
       ANybakk::ConveyorBlob::onTick(this);
       
+      //Retrieve current mode
+      u8 currentMode = this.get_u8("ConveyorBlobMode");
+      
+      //Check if mode is not off
+      if(currentMode != ANybakk::ConveyorBlobMode::MODE_OFF) {
+      
+        //Propel any overlapping blobs
+        releaseOverlappingOutside(this);
+        
+      }
+      
     }
     
     
@@ -64,6 +78,105 @@ namespace ANybakk {
     void onSetStatic(CBlob@ this, const bool isStatic) {
     
       ANybakk::ConveyorBlob::onSetStatic(this, isStatic);
+      
+    }
+    
+    
+    
+    /**
+     * Propels any overlapping blobs that are in pipe
+     */
+    void releaseOverlappingOutside(CBlob@ this) {
+      
+      //Create an array of blobs
+      CBlob@[] overlappingBlobs;
+      
+      //Check if any blobs are overlapping
+      if(this.getOverlapping(@overlappingBlobs)) {
+        
+        //Retrieve current orientation
+        u16 orientation = this.get_u16("StructureBlobOrientation");
+        
+        //Create a blob handle
+        CBlob@ overlappingBlob;
+        
+        //Iterate through all overlapping blobs
+        for(int i=0; i<overlappingBlobs.length; i++) {
+        
+          //Keep reference to this blob
+          @overlappingBlob = overlappingBlobs[i];
+          
+          //Check if invalid blob or can't convey
+          if(overlappingBlob is null || !canConvey(this, overlappingBlob)) {
+          
+            //Skip to the next one
+            continue;
+            
+          }
+          
+          //Get blob's position
+          Vec2f overlappingPosition = overlappingBlob.getPosition();
+          
+          //Check if outside and in pipe
+          if(!this.isPointInside(overlappingPosition) && overlappingBlob.hasTag("isInPipe")) {
+          
+            //Obtain a reference to the map object
+            CMap@ map = this.getMap();
+            
+            //Create a blob array
+            CBlob@[] blobsAtPosition;
+            
+            //Create a valid pipe flag
+            bool isValidPipe = false;
+            
+            //Check if any blobs at position
+            if(map.getBlobsAtPosition(overlappingPosition, blobsAtPosition)) {
+            
+              //Create blob handle
+              CBlob@ blobAtPosition;
+              
+              //Iterate through blobs
+              for(int i=0; i<blobsAtPosition.length; i++) {
+              
+                //Keep blob reference
+                @blobAtPosition = blobsAtPosition[i];
+                
+                //Check if blob is valid and is pipe
+                if(blobAtPosition !is null && blobAtPosition.hasTag("isPipe")) {
+                
+                  //Check if connected
+                  isValidPipe = isValidPipe || ANybakk::ConveyorBlob::isConnected(this, blobAtPosition);
+                  
+                }
+                
+              }
+            
+            }
+            
+            //Check if valid pipe was not found
+            if(!isValidPipe) {
+    
+              //Tell pipeable to enter this pipe
+              ANybakk::PipeableBlob::exitPipe(overlappingBlob);
+              
+              //Check if pipeable vanilla
+              if(ANybakk::PipeableBlob::isConsideredPipeableVanilla(overlappingBlob)) {
+              
+                //Manually call sprite's onTick once
+                ANybakk::PipeableSprite::onTick(overlappingBlob.getSprite());
+                
+              }
+              
+            }
+            
+          }
+          
+        }
+        
+      }
+      
+      //Finished
+      return;
       
     }
     
@@ -125,6 +238,22 @@ namespace ANybakk {
       //Set velocity leftwards
       otherBlob.setVelocity(Vec2f(-targetVelocity.x, 0.0f));
       
+    }
+    
+    
+    
+    /**
+     * Checks if a pipe funnel can convey another blob
+     */
+    bool canConvey(CBlob@ this, CBlob@ otherBlob) {
+    
+      return 
+        this.hasTag("isPlaced")
+        && this.get_u8("ConveyorBlobMode") != ANybakk::ConveyorBlobMode::MODE_OFF
+        && otherBlob !is null
+        && !otherBlob.hasTag("isStructure")
+        && ANybakk::PipeableBlob::isConsideredPipeable(otherBlob);
+        
     }
     
     

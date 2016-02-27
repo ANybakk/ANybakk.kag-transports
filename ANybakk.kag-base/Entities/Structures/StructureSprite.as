@@ -4,6 +4,7 @@
  * Author: ANybakk
  */
 
+#include "EntitySprite.as";
 
 
 namespace ANybakk {
@@ -17,13 +18,7 @@ namespace ANybakk {
      */
     void onInit(CSprite@ this) {
       
-      CBlob@ blob = this.getBlob();
-    
-      //Set default animation state (conveyor is not placed yet)
-      this.SetAnimation("default");
-      
-      //Set default frame to 0
-      this.animation.frame = 0;
+      ANybakk::EntitySprite::onInit(this);
       
       //Finished
       return;
@@ -36,6 +31,8 @@ namespace ANybakk {
      * Tick event function
      */
     void onTick(CSprite@ this) {
+      
+      ANybakk::EntitySprite::onTick(this);
 
       //Obtain a reference to the blob object
       CBlob@ blob = this.getBlob();
@@ -99,7 +96,7 @@ namespace ANybakk {
             
           } else {
           
-            //Set frame to 0
+            //Set frame to 2
             this.animation.frame = 2;
             
           }
@@ -111,12 +108,12 @@ namespace ANybakk {
         
           if(variants == 2) {
           
-            //Set frame to 0
+            //Set frame to 1
             this.animation.frame = 1;
             
           } else {
           
-            //Set frame to 0
+            //Set frame to 3
             this.animation.frame = 3;
             
           }

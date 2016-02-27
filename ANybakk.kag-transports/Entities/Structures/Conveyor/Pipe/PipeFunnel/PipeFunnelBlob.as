@@ -1,5 +1,7 @@
 /* 
  * Pipe Funnel blob.
+ *
+ * NOTE: Must be bundled with PipeableVariables.as or a derived version
  * 
  * Author: ANybakk
  */
@@ -8,6 +10,9 @@
 #include "ConveyorBlob.as";
 #include "ConveyorBlobMode";
 #include "PipeBlob.as";
+#include "PipeableVariables.as"; //Required for PipeableBlob.as
+#include "PipeableBlob.as";
+#include "PipeableSprite.as";
 
 
 
@@ -62,49 +67,79 @@ namespace ANybakk {
     
     
     
-    bool doesCollideWithBlob(CBlob@ this, CBlob@ other) {
-    /*
-      //Determine relative displacement 
-      Vec2f relativeDisplacement = other.getPosition() - this.getPosition();
+    bool doesCollideWithBlob(CBlob@ this, CBlob@ otherBlob) {
+    
+      //Check if can't convey
+      if(!ANybakk::PipeBlob::canConvey(this, otherBlob)) {
       
-      //Retrieve current orientation
-      u16 orientation = this.get_u16("StructureBlobOrientation");
+        //Obtain position
+        Vec2f position = this.getPosition();
       
-      //Check if orientation is up
-      if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_UP) {
-      
-        //Finished, return true if beyond segment
-        return relativeDisplacement.y < 0 - this.getShape().getHeight();
+        //Obtain a reference to the shape object
+        CShape@ shape = this.getShape();
         
-      }
-      
-      //Check if orientation is right
-      else if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_RIGHT) {
-      
-        //Finished, return true if beyond segment
-        return relativeDisplacement.x > 0 + this.getShape().getWidth();
+        //Obtain width and height
+        f32 width = shape.getWidth();
+        f32 height = shape.getHeight();
         
-      }
-      
-      //Check if orientation is down
-      else if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_DOWN) {
-      
-        //Finished, return true if beyond segment
-        return relativeDisplacement.y > 0 + this.getShape().getHeight();
+        //Obtain a reference to the map object
+        CMap@ map = this.getMap();
         
-      }
-      
-      //Check if orientation is left
-      else if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_LEFT) {
-      
-        //Finished, return true if beyond segment
-        return relativeDisplacement.x < 0 - this.getShape().getWidth();
+        //Determine relative displacement 
+        Vec2f relativeDisplacement = otherBlob.getPosition() - position;
         
+        //Retrieve current orientation
+        u16 orientation = this.get_u16("StructureBlobOrientation");
+        
+        //Check if orientation is up
+        if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_UP) {
+          
+          //Finished, return true if beyond segment and both adjacent tiles are solid
+          return 
+            relativeDisplacement.y < 0.0f - height 
+            && map.isTileSolid(position - Vec2f(width, 0.0f)) 
+            && map.isTileSolid(position + Vec2f(width, 0.0f));
+          
+        }
+        
+        //Check if orientation is right
+        else if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_RIGHT) {
+        
+          //Finished, return true if beyond segment and both adjacent tiles are solid
+          return 
+            relativeDisplacement.x > 0.0f + width 
+            && map.isTileSolid(position - Vec2f(0.0f, height)) 
+            && map.isTileSolid(position + Vec2f(0.0f, height));
+          
+        }
+        
+        //Check if orientation is down
+        else if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_DOWN) {
+        
+          //Finished, return true if beyond segment and both adjacent tiles are solid
+          return 
+            relativeDisplacement.y > 0.0f + height 
+            && map.isTileSolid(position - Vec2f(width, 0.0f)) 
+            && map.isTileSolid(position + Vec2f(width, 0.0f));
+          
+        }
+        
+        //Check if orientation is left
+        else if(orientation == ANybakk::StructureBlobOrientation::ORIENTATION_LEFT) {
+        
+          //Finished, return true if beyond segment and both adjacent tiles are solid
+          return 
+            relativeDisplacement.x < 0.0f - width 
+            && map.isTileSolid(position - Vec2f(0.0f, height)) 
+            && map.isTileSolid(position + Vec2f(0.0f, height));
+          
+        }
+      
       }
       
       //Finished, return false
       return false;
-      */return false;
+      
     }
     
     
@@ -112,7 +147,7 @@ namespace ANybakk {
     void onCollision(CBlob@ this, CBlob@ otherBlob, bool solid, Vec2f normal, Vec2f point1) {
       
       //Check if can convey and object not already in a pipe
-      if(canConvey(this, otherBlob) && !otherBlob.hasTag("isInPipe")) {
+      if(ANybakk::PipeBlob::canConvey(this, otherBlob) && !otherBlob.hasTag("isInPipe")) {
       
         //Retrieve current orientation
         u16 orientation = this.get_u16("StructureBlobOrientation");
@@ -171,7 +206,7 @@ namespace ANybakk {
           @overlappingBlob = overlappingBlobs[i];
           
           //Check if invalid blob or can't convey
-          if(overlappingBlob is null || !canConvey(this, overlappingBlob)) {
+          if(overlappingBlob is null || !ANybakk::PipeBlob::canConvey(this, overlappingBlob)) {
           
             //Skip to the next one
             continue;
@@ -182,7 +217,6 @@ namespace ANybakk {
           Vec2f overlappingPosition = overlappingBlob.getPosition();
           
           //Check if within and in pipe
-          //TODO: item might not actually be physically inside yet
           if(this.isPointInside(overlappingPosition) && overlappingBlob.hasTag("isInPipe")) {
           
             //Determine if this blob entered the pipe through this segment
@@ -191,10 +225,10 @@ namespace ANybakk {
             propel(this, overlappingBlob);
             
           }
-          
-          //Otherwise, check if outside
-          else if(!this.isPointInside(overlappingPosition)) {
           /*
+          //Otherwise, check if outside and in pipe
+          else if(!this.isPointInside(overlappingPosition) && overlappingBlob.hasTag("isInPipe")) {
+          
             //Obtain a reference to the map object
             CMap@ map = this.getMap();
             
@@ -230,19 +264,21 @@ namespace ANybakk {
             
             //Check if valid pipe was not found
             if(!isValidPipe) {
-            
-              //Disable in pipe flag
-              overlappingBlob.Untag("isInPipe");
+    
+              //Tell pipeable to enter this pipe
+              ANybakk::PipeableBlob::exitPipe(overlappingBlob);
               
-              //Reset pipe ID
-              overlappingBlob.set_netid("enteredPipeID", 0);
+              //Check if pipeable vanilla
+              if(ANybakk::PipeableBlob::isConsideredPipeableVanilla(overlappingBlob)) {
               
-              //Restore gravitational forces
-              overlappingBlob.getShape().SetGravityScale(1.0f);
+                //Manually call sprite's onTick once
+                ANybakk::PipeableSprite::onTick(overlappingBlob.getSprite());
+                
+              }
               
             }
-           */ 
-          }
+            
+          }*/
           
         }
         
@@ -251,29 +287,6 @@ namespace ANybakk {
       //Finished
       return;
       
-    }
-    
-    
-    
-    bool canConvey(CBlob@ this, CBlob@ otherBlob) {
-    
-      return this.hasTag("isPlaced")
-        && this.get_u8("ConveyorBlobMode") != ANybakk::ConveyorBlobMode::MODE_OFF
-        && otherBlob !is null 
-        && !otherBlob.hasTag("isStructure") 
-        && (
-          otherBlob.hasTag("isPipeable")
-          || otherBlob.hasTag("material")
-          || otherBlob.hasTag("food")
-          || otherBlob.getName() == "bomb"
-          || otherBlob.getName() == "waterbomb"
-          || otherBlob.getName() == "mine"
-          || otherBlob.getName() == "lantern"
-          || otherBlob.getName() == "powerup"
-          || otherBlob.getName() == "arrow"
-          || otherBlob.getName() == "sponge"
-        );
-          
     }
     
     
@@ -398,29 +411,20 @@ namespace ANybakk {
      * Handler for when a blob has been absorbed
      */
     void onAbsorbed(CBlob@ this, CBlob@ otherBlob) {
+    
+      //Tell pipeable to enter this pipe
+      ANybakk::PipeableBlob::enterPipe(otherBlob, this);
       
-      //Store pipe ID
-      otherBlob.set_netid("enteredPipeID", this.getNetworkID());
+      //Check if pipeable vanilla
+      if(ANybakk::PipeableBlob::isConsideredPipeableVanilla(otherBlob)) {
       
-      //Obtain a reference to the other blob's shape object
-      CShape@ otherShape = otherBlob.getShape();
-      
-      //Disable collisions
-      //otherShape.checkCollisionsAgain = false;
-      otherShape.getConsts().mapCollisions = false;
-      otherShape.getConsts().collidable = false;
-      
-      //Disable gravity for object
-      otherShape.SetGravityScale(0.0f);
-      
-      //Set invisible
-      //otherBlob.getSprite().SetVisible(true);
+        //Manually call sprite's onTick once
+        ANybakk::PipeableSprite::onTick(otherBlob.getSprite());
+        
+      }
       
       //Set entered pipe flag
       this.Tag("wasEntered");
-      
-      //Set in pipe flag
-      otherBlob.Tag("isInPipe");
       
     }
     

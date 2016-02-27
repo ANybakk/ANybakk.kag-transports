@@ -4,7 +4,8 @@
  * Author: ANybakk
  */
 
-#include "StructureSpriteLayer.as";
+#include "EntitySprite.as";
+#include "EntitySpriteLayer.as";
 #include "ConveyorSprite.as";
 
 
@@ -37,8 +38,8 @@ namespace ANybakk {
       //Check if recently placed
       if(this.getBlob().hasTag("wasPlaced")) {
       
-        //Put in the background, behind ladders
-        this.SetZ(ANybakk::StructureSpriteLayer::LAYER_BEHIND_LADDER);
+        //Put in the background layer
+        ANybakk::EntitySprite::setLayer(this, ANybakk::EntitySpriteLayer::LAYER_BACKGROUND);
         
       }
     

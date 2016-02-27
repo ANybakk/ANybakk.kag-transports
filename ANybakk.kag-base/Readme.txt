@@ -28,3 +28,6 @@ various tags, or flags, on the underlying objects.
 
 New entities may also have to include their parent's variables in their 
 original name-space.
+
+Entities can also be "abstract". Abstract types have their place in the 
+hierarchy, but do not "inherit" behaviour.

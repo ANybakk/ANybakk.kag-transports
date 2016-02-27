@@ -267,22 +267,20 @@ namespace ANybakk {
      */
     bool isConnected(CBlob@ this, CBlob@ other) {
     
-      //Check if either is invalid, not conveyor ot not same type
+      //Check if either is invalid, not conveyor or not same type
       if(this is null || other is null || !this.hasTag("isConveyor") || !other.hasTag("isConveyor")) {
       
-        //Finished, return false
+        //Finished, return false (could not check)
         return false;
         
       }
-      
-      bool result = false;
       
       //Create a couple of reference arrays
       u32[]@ thisConnectionIDs;
       u32[]@ otherConnectionIDs;
       
       //Check if connection IDs could be retrieved
-      if(this.get("connectionIDs", @thisConnectionIDs) && other.get("connectionIDs", @thisConnectionIDs)) {
+      if(this.get("connectionIDs", @thisConnectionIDs) && other.get("connectionIDs", @otherConnectionIDs)) {
       
         //Iterate through this segment's IDs
         for(int i=0; i<thisConnectionIDs.length; i++) {
@@ -290,8 +288,13 @@ namespace ANybakk {
           //Iterate through other segment's IDs
           for(int j=0; j<otherConnectionIDs.length; j++) {
           
-            //Remember if ID matches
-            result = result || thisConnectionIDs[i] == otherConnectionIDs[j];
+            //Check if IDs match
+            if(thisConnectionIDs[i] == other.getNetworkID() && otherConnectionIDs[j] == this.getNetworkID()) {
+            
+              //Finished, match was found
+              return true;
+            
+            }
             
           }
           
@@ -299,8 +302,8 @@ namespace ANybakk {
         
       }
       
-      //Finished, return false
-      return result;
+      //Finished, return false (no match found)
+      return false;
       
     }
     
