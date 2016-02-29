@@ -1,0 +1,1 @@
+Changes in vanilla code is marked with comments containing the string "kag-transports"

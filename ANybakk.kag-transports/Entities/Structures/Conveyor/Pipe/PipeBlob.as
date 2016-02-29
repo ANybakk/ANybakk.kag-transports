@@ -94,9 +94,6 @@ namespace ANybakk {
       //Check if any blobs are overlapping
       if(this.getOverlapping(@overlappingBlobs)) {
         
-        //Retrieve current orientation
-        u16 orientation = this.get_u16("StructureBlobOrientation");
-        
         //Create a blob handle
         CBlob@ overlappingBlob;
         
@@ -117,8 +114,12 @@ namespace ANybakk {
           //Get blob's position
           Vec2f overlappingPosition = overlappingBlob.getPosition();
           
-          //Check if outside and in pipe
-          if(!this.isPointInside(overlappingPosition) && overlappingBlob.hasTag("PipeableBlob::isInPipe")) {
+          //Check if this was the previous pipe segment, object is now outside this, and still tagged as in pipe
+          if(
+              overlappingBlob.get_netid("PipeableBlob::lastPipeID") == this.getNetworkID() 
+              && !this.isPointInside(overlappingPosition) 
+              && overlappingBlob.hasTag("PipeableBlob::isInPipe")
+          ) {
           
             //Obtain a reference to the map object
             CMap@ map = this.getMap();
@@ -130,16 +131,16 @@ namespace ANybakk {
             bool isValidPipe = false;
             
             //Check if any blobs at position
-            if(map.getBlobsAtPosition(overlappingPosition, blobsAtPosition)) {
+            if(map.getBlobsAtPosition(overlappingPosition, @blobsAtPosition)) {
             
               //Create blob handle
               CBlob@ blobAtPosition;
               
               //Iterate through blobs
-              for(int i=0; i<blobsAtPosition.length; i++) {
+              for(int j=0; j<blobsAtPosition.length; j++) {
               
                 //Keep blob reference
-                @blobAtPosition = blobsAtPosition[i];
+                @blobAtPosition = blobsAtPosition[j];
                 
                 //Check if blob is valid and is pipe
                 if(blobAtPosition !is null && blobAtPosition.hasTag("isPipe")) {
@@ -190,8 +191,8 @@ namespace ANybakk {
       //Create a vector for target velocity
       Vec2f targetVelocity = ANybakk::ConveyorBlob::getModeData(this).mTargetVelocity;
       
-      //Set velocity upwards
-      otherBlob.setVelocity(Vec2f(0.0f, -targetVelocity.y));
+      //Propel up
+      ANybakk::PipeableBlob::propel(otherBlob, Vec2f(0.0f, -targetVelocity.y), this);
       
     }
     
@@ -205,8 +206,8 @@ namespace ANybakk {
       //Create a vector for target velocity
       Vec2f targetVelocity = ANybakk::ConveyorBlob::getModeData(this).mTargetVelocity;
       
-      //Set velocity rightwards
-      otherBlob.setVelocity(Vec2f(targetVelocity.x, 0.0f));
+      //Propel right
+      ANybakk::PipeableBlob::propel(otherBlob, Vec2f(targetVelocity.x, 0.0f), this);
       
     }
     
@@ -220,8 +221,8 @@ namespace ANybakk {
       //Create a vector for target velocity
       Vec2f targetVelocity = ANybakk::ConveyorBlob::getModeData(this).mTargetVelocity;
       
-      ///Set velocity downwards
-      otherBlob.setVelocity(Vec2f(0.0f, targetVelocity.y));
+      //Propel down
+      ANybakk::PipeableBlob::propel(otherBlob, Vec2f(0.0f, targetVelocity.y), this);
       
     }
     
@@ -235,8 +236,8 @@ namespace ANybakk {
       //Create a vector for target velocity
       Vec2f targetVelocity = ANybakk::ConveyorBlob::getModeData(this).mTargetVelocity;
       
-      //Set velocity leftwards
-      otherBlob.setVelocity(Vec2f(-targetVelocity.x, 0.0f));
+      //Propel left
+      ANybakk::PipeableBlob::propel(otherBlob, Vec2f(-targetVelocity.x, 0.0f), this);
       
     }
     

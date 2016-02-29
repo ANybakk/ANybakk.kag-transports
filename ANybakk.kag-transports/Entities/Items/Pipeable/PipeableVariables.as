@@ -9,11 +9,14 @@ namespace ANybakk {
 
   namespace PipeableVariables {
   
-    //Define an array of vanilla object names that should be considered pipeable
-    const string[] VANILLA_PIPEABLE_NAMES = { "bomb", "waterbomb", "mine", "lantern", "powerup", "arrow", "sponge" };
+    //Define an array of pure vanilla object names that should be considered pipeable (where interfaces aren't referred in configuration file)
+    const string[] VANILLA_PIPEABLE_NAMES = { };
     
-    //Define an array of vanilla group tag names that should be considered pipeable
-    const string[] VANILLA_PIPEABLE_GROUP_NAMES = { "material", "food" };
+    //Define an array of pure vanilla group tag names that should be considered pipeable (where interfaces aren't referred in configuration file)
+    const string[] VANILLA_PIPEABLE_GROUP_NAMES = { };
+    
+    //Define an invisible on entering pipe flag
+    const bool MAKE_INVISIBLE_ON_ENTERED_PIPE = false;
     
     //Define a shrinkage on entering pipe flag
     const bool SHRINK_ON_ENTERED_PIPE = false;

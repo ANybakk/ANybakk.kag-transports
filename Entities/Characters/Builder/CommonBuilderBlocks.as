@@ -94,12 +94,14 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks)
 		blocks[0].push_back(b);
 	}
   
+  //kag-transports
   BuildBlock[] page_transport;
   blocks.push_back(page_transport);
   
   {
     BuildBlock b(0, "Belt Conveyor", "$Belt Conveyor$", "Conveyor\nTransports stuff");
     AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 15);
+    AddRequirement(b.reqs, "blob", "mat_stone", "Stone", 10);
     blocks[1].push_back(b);
   }
   

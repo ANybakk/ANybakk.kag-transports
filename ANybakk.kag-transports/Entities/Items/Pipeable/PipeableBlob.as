@@ -7,8 +7,6 @@
  * Author: ANybakk
  */
 
-#include "ItemBlob.as";
-
 
 
 namespace ANybakk {
@@ -26,6 +24,9 @@ namespace ANybakk {
       //Store pipe ID
       this.set_netid("PipeableBlob::enteredPipeID", 0);
       
+      //Store last pipe ID
+      this.set_netid("PipeableBlob::lastPipeID", 0);
+      
     }
     
     
@@ -34,6 +35,9 @@ namespace ANybakk {
     
       this.Tag("isPipeable");
       
+      //Untag recently propelled
+      this.Untag("PipeableBlob::wasPropelled");
+      
     }
     
     
@@ -41,6 +45,16 @@ namespace ANybakk {
     void onTick(CBlob@ this) {
     
       //No hierarchy call
+      return;
+      
+    }
+    
+    
+    
+    bool canBePickedUp(CBlob@ this, CBlob@ byBlob) {
+    
+      //Return true if not in pipe
+      return !this.hasTag("PipeableBlob::isInPipe");
       
     }
     
@@ -70,14 +84,6 @@ namespace ANybakk {
         
         //Disable gravity
         shape.SetGravityScale(0.0f);
-        
-        //Check if vanilla type
-        if(isConsideredPipeableVanilla(this)) {
-        
-          //TODO: Disable pickup
-          
-          
-        }
         
         //Update flags
         this.Tag("PipeableBlob::isInPipe");
@@ -166,6 +172,21 @@ namespace ANybakk {
       //Lastly, return true if name matches some entry in vanilla name array
       return ANybakk::PipeableVariables::VANILLA_PIPEABLE_NAMES.find(this.getName()) >= 0;
     
+    }
+    
+    
+    
+    void propel(CBlob@ this, Vec2f velocity, CBlob@ pipeBlob) {
+    
+      //Set velocity upwards
+      this.setVelocity(velocity);
+      
+      //Store segment ID as last pipe ID
+      this.set_netid("PipeableBlob::lastPipeID", pipeBlob.getNetworkID());
+      
+      //Tag as recently propelled
+      this.Tag("PipeableBlob::wasPropelled");
+      
     }
     
     

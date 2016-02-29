@@ -14,10 +14,10 @@ namespace ANybakk {
      */
     enum Orientation {
     
-      LAYER_ABYSS = -500,
+      LAYER_ABYSS = -1000,
       LAYER_BACKGROUND = -50,
       LAYER_LADDER = -40,
-      LAYER_DEFAULT = 0,
+      LAYER_DEFAULT = 1,
       LAYER_FOREGROUND = 50,
       LAYER_MECHANISM_FOREGROUND = 500
       

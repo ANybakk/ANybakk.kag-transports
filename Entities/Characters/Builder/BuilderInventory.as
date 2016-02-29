@@ -23,7 +23,7 @@ namespace Builder
 		PAGE_ONE,
 		PAGE_TWO,
 		PAGE_THREE,
-		PAGE_FOUR, //MODIFIED
+		PAGE_FOUR, //kag-transports
 		PAGE_COUNT
 	};
 }
@@ -31,7 +31,7 @@ namespace Builder
 const string[] PAGE_NAME =
 {
 	"Building",
-	"Transport", //MODIFIED
+	"Transport", //kag-transports
 	"Component",
 	"Source",
 	"Device"
@@ -148,7 +148,7 @@ void MakeBlocksMenu(CInventory@ this, const Vec2f &in INVENTORY_CE)
 		}
     
     
-    //NEW: Count number of pages with any blocks associated with them
+    //kag-transports: Count number of pages with any blocks associated with them
     int realPageCount = 0;
     for(u8 i = 0; i < Builder::PAGE_COUNT; i++) {
       
@@ -159,13 +159,13 @@ void MakeBlocksMenu(CInventory@ this, const Vec2f &in INVENTORY_CE)
     }
     
 		// index menu only available in sandbox
-		// if(getRules().gamemode_name != "Sandbox") return; //MODIFIED
+		// if(getRules().gamemode_name != "Sandbox") return; //kag-transports
 
-		const Vec2f INDEX_POS = Vec2f(menu.getLowerRightPosition().x + GRID_PADDING + GRID_SIZE, menu.getUpperLeftPosition().y + GRID_SIZE * realPageCount / 2); //MODIFIED
+		const Vec2f INDEX_POS = Vec2f(menu.getLowerRightPosition().x + GRID_PADDING + GRID_SIZE, menu.getUpperLeftPosition().y + GRID_SIZE * realPageCount / 2); //kag-transports
     
         
     
-		CGridMenu@ index = CreateGridMenu(INDEX_POS, blob, Vec2f(2, realPageCount), "Type"); //MODIFIED
+		CGridMenu@ index = CreateGridMenu(INDEX_POS, blob, Vec2f(2, realPageCount), "Type"); //kag-transports
 		if(index !is null)
 		{
 			index.deleteAfterClick = false;
@@ -176,7 +176,7 @@ void MakeBlocksMenu(CInventory@ this, const Vec2f &in INVENTORY_CE)
 			for(u8 i = 0; i < Builder::PAGE_COUNT; i++)
 			{
       
-        if(i < blocks.length && blocks[i] !is null && blocks[i].length > 0) { //NEW: Only non-empty pages
+        if(i < blocks.length && blocks[i] !is null && blocks[i].length > 0) { //kag-transports: Only non-empty pages
         
           CGridButton@ button = index.AddButton("$"+PAGE_NAME[i]+"$", PAGE_NAME[i], Builder::PAGE_SELECT + i, Vec2f(2, 1), params);
           if(button is null) continue;
@@ -188,7 +188,7 @@ void MakeBlocksMenu(CInventory@ this, const Vec2f &in INVENTORY_CE)
             button.SetSelected(1);
           }
           
-        } //NEW
+        } //kag-transports
 			}
 		}
 	}
