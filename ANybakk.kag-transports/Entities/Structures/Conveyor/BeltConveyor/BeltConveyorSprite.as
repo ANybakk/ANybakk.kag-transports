@@ -26,8 +26,6 @@ namespace ANybakk {
       
       CBlob@ blob = this.getBlob();
       
-      blob.set_u32("lastRunningSoundTime", getGameTime());
-      
       //Set default animation state (conveyor is not placed yet)
       this.SetAnimation("default");
       
@@ -49,7 +47,6 @@ namespace ANybakk {
      */
     void onTick(CSprite@ this) {
     
-      //Call super type's onTick (for placement sound)
       ANybakk::ConveyorSprite::onTick(this);
       
       //Update section
@@ -57,31 +54,6 @@ namespace ANybakk {
       
       //Update animation
       updateAnimation(this);
-    
-      //Obtain a reference to the blob object
-      CBlob@ blob = this.getBlob();
-      
-      //Retrieve time variable for when the running sound was last played
-      u32 lastRunningSoundTime = blob.get_u32("lastRunningSoundTime");
-      
-      //Check if more than 0.68 seconds have passed
-      if(getGameTime() - lastRunningSoundTime >= 0.68 * getTicksASecond()) {
-  
-        //Retrieve current blob mode
-        u8 blobMode = blob.get_u8("ConveyorBlobMode");
-        
-        //Check if mode is slow
-        if(blobMode == ANybakk::ConveyorBlobMode::MODE_SLOW) {
-        
-          //Play running sound
-          //this.PlaySound("BeltConveyorSlow.ogg");
-          
-          //Update time variable
-          blob.set_u32("lastRunningSoundTime", getGameTime());
-          
-        }
-        
-      }
       
     }
     
@@ -268,7 +240,7 @@ namespace ANybakk {
       CBlob@ blob = this.getBlob();
       
       //Check if connected both to the left and to the right
-      if(blob.hasTag("isConnectedLeft") && blob.hasTag("isConnectedRight")) {
+      if(blob.hasTag("ConveyorVariables::isConnectedLeft") && blob.hasTag("ConveyorVariables::isConnectedRight")) {
       
         //Set section to middle
         blob.set_u8("BeltConveyorSpriteSection", ANybakk::BeltConveyorSpriteSection::SECTION_MIDDLE);
@@ -276,14 +248,14 @@ namespace ANybakk {
       }
       
       //Otherwise, check if connected to the right
-      else if(blob.hasTag("isConnectedRight")) {
+      else if(blob.hasTag("ConveyorVariables::isConnectedRight")) {
       
         blob.set_u8("BeltConveyorSpriteSection", ANybakk::BeltConveyorSpriteSection::SECTION_LEFT);
         
       }
       
       //Otherwise, check if connected to the left
-      else if(blob.hasTag("isConnectedLeft")) {
+      else if(blob.hasTag("ConveyorVariables::isConnectedLeft")) {
       
         //Set section to right
         blob.set_u8("BeltConveyorSpriteSection", ANybakk::BeltConveyorSpriteSection::SECTION_RIGHT);

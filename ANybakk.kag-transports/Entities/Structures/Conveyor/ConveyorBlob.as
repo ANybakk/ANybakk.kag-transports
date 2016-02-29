@@ -32,13 +32,13 @@ namespace ANybakk {
       this.Tag("isConveyor");
       
       //Set sync flag (propagates connection update to adjacent segments, on placement)
-      this.Tag("isSynchronized");
+      this.Tag("ConveyorBlob::isSynchronized");
       
       //Set animation sync flag (propagates connection animation update to adjacent segments, on placement)
-      this.Tag("isAnimationSynchronized");
+      this.Tag("ConveyorBlob::isAnimationSynchronized");
       
       //Set sound sync flag (propagates connection sound update to adjacent segments, on placement)
-      this.Tag("isSoundSynchronized");
+      this.Tag("ConveyorBlob::isSoundSynchronized");
       
       //Set initial mode to OFF
       this.set_u8("ConveyorBlobMode", ANybakk::ConveyorVariables::DEFAULT_MODE);
@@ -50,13 +50,13 @@ namespace ANybakk {
       this.set("ConveyorBlobConnectionData", @ANybakk::ConveyorVariables::CONNECTION_DATA);
       
       //Store the time of last time connections were updated (used to avoid circular loops)
-      this.set_u32("lastUpdateConnectionsTime", getGameTime());
+      this.set_u32("ConveyorBlob::lastUpdateConnectionsTime", getGameTime());
       
       //Create an empty ID array
       u32[] connectionIDs = {};
       
       //Store the time of last time connections were updated (used to avoid circular loops)
-      this.set("connectionIDs", @connectionIDs);
+      this.set("ConveyorBlob::connectionIDs", @connectionIDs);
       
       //Set flag so that blob cannot be rotated when built (for BlobPlacement.as)
       this.Tag("place norotate");
@@ -97,13 +97,13 @@ namespace ANybakk {
     
       ANybakk::StructureBlob::onSetStatic(this, isStatic);
       
-      if(this.hasTag("isPlaced")) {
+      if(this.hasTag("StructureBlob::isPlaced")) {
       
         //Set mode to default
         this.set_u8("ConveyorBlobMode", ANybakk::ConveyorVariables::DEFAULT_ON_MODE);
         
         //Update connections
-        updateConnections(this, null, null, this.hasTag("isSynchronized"), this.hasTag("isAnimationSynchronized"), this.hasTag("isSoundSynchronized"));
+        updateConnections(this, null, null, this.hasTag("ConveyorBlob::isSynchronized"), this.hasTag("ConveyorBlob::isAnimationSynchronized"), this.hasTag("ConveyorBlob::isSoundSynchronized"));
       
       }
       
@@ -130,10 +130,10 @@ namespace ANybakk {
     void updateConnections(CBlob@ this, CBlob@ previousBlob=null, ANybakk::ConveyorBlobConnectionData@ previousData=null, bool doPropagate=false, bool doAnimationSync=false, bool doSoundSync=false) {
       
       //Check if placed
-      if(this.hasTag("isPlaced")) {
+      if(this.hasTag("StructureBlob::isPlaced")) {
       
         //Update time variable
-        this.set_u32("lastUpdateConnectionsTime", getGameTime());
+        this.set_u32("ConveyorBlob::lastUpdateConnectionsTime", getGameTime());
         
         //Check if previous is valid and animation propagate flag
         if(previousBlob !is null && doAnimationSync) {
@@ -146,7 +146,7 @@ namespace ANybakk {
         //Check if previous is valid and sound propagate flag
         if(previousBlob !is null && doSoundSync) {
         
-          this.set_u32("lastRunningSoundTime", previousBlob.get_u32("lastRunningSoundTime"));
+          this.set_u32("ConveyorSprite::lastRunningSoundTime", previousBlob.get_u32("ConveyorSprite::lastRunningSoundTime"));
           
         }
         
@@ -179,8 +179,8 @@ namespace ANybakk {
                     nextBlob !is null
                     //nextBlob.getName() == currentBlob.getName() 
                     && nextBlob.hasTag("isConveyor") 
-                    && nextBlob.hasTag("isPlaced") 
-                    && !nextBlob.hasTag("wasDestroyed")
+                    && nextBlob.hasTag("StructureBlob::isPlaced") 
+                    && !nextBlob.hasTag("StructureBlob::wasDestroyed")
                     && nextBlob.get_u8("ConveyorBlobDirection") == this.get_u8("ConveyorBlobDirection")
                     && isCompatible(this, nextBlob)
                     //And nextBlob has correct orientation
@@ -196,7 +196,7 @@ namespace ANybakk {
                     u32[]@ previousConnectionIDs;
                     
                     //Retrieve previous segment's IDs
-                    if(previousBlob.get("connectionIDs", @previousConnectionIDs)) {
+                    if(previousBlob.get("ConveyorBlob::connectionIDs", @previousConnectionIDs)) {
                     
                       //Retrieve index of this segment's ID
                       int a = previousConnectionIDs.find(this.getNetworkID());
@@ -218,7 +218,7 @@ namespace ANybakk {
                     u32[]@ thisConnectionIDs;
                     
                     //Retrieve previous segment's IDs
-                    if(this.get("connectionIDs", @thisConnectionIDs)) {
+                    if(this.get("ConveyorBlob::connectionIDs", @thisConnectionIDs)) {
                     
                       //Retrieve index of previous segment's ID
                       int a = thisConnectionIDs.find(previousBlob.getNetworkID());
@@ -236,7 +236,7 @@ namespace ANybakk {
                   }
                   
                   //Check if previous is not valid (first segment), or propagating while next not the same as previous and next hasn't already been updated
-                  if(previousBlob is null || (doPropagate && nextBlob.getNetworkID() != previousBlob.getNetworkID() && nextBlob.get_u32("lastUpdateConnectionsTime") != getGameTime())) {
+                  if(previousBlob is null || (doPropagate && nextBlob.getNetworkID() != previousBlob.getNetworkID() && nextBlob.get_u32("ConveyorBlob::lastUpdateConnectionsTime") != getGameTime())) {
                   
                     //Recursively handle the next segment
                     updateConnections(nextBlob, this, connectionData[i], doPropagate, doAnimationSync, doSoundSync);
@@ -280,7 +280,7 @@ namespace ANybakk {
       u32[]@ otherConnectionIDs;
       
       //Check if connection IDs could be retrieved
-      if(this.get("connectionIDs", @thisConnectionIDs) && other.get("connectionIDs", @otherConnectionIDs)) {
+      if(this.get("ConveyorBlob::connectionIDs", @thisConnectionIDs) && other.get("ConveyorBlob::connectionIDs", @otherConnectionIDs)) {
       
         //Iterate through this segment's IDs
         for(int i=0; i<thisConnectionIDs.length; i++) {
@@ -311,17 +311,16 @@ namespace ANybakk {
     
     void onDie(CBlob@ this) {
     
+      ANybakk::StructureBlob::onDie(this);
+    
       //Check if valid and placed
-      if(this !is null && this.hasTag("isPlaced")) {
-      
-        //Tag as recently destroyed
-        this.Tag("wasDestroyed");
+      if(this !is null && this.hasTag("StructureBlob::wasDestroyed")) {
       
         //Create a reference array
         u32[]@ thisConnectionIDs;
         
         //Check if connection IDs could be retrieved
-        if(this.get("connectionIDs", @thisConnectionIDs)) {
+        if(this.get("ConveyorBlob::connectionIDs", @thisConnectionIDs)) {
         
           //Create a blob reference handle
           CBlob@ otherBlob;
@@ -336,7 +335,7 @@ namespace ANybakk {
             u32[]@ otherConnectionIDs;
             
             //Check if other is valid and connection IDs could be retrieved
-            if(otherBlob !is null && otherBlob.get("connectionIDs", @otherConnectionIDs)) {
+            if(otherBlob !is null && otherBlob.get("ConveyorBlob::connectionIDs", @otherConnectionIDs)) {
             
               //Iterate through other segment's IDs
               for(int j=0; j<otherConnectionIDs.length; j++) {
@@ -369,7 +368,7 @@ namespace ANybakk {
                     }
                     
                     //Update connections for other segment (lightweight, only immediate neighbours)
-                    updateConnections(otherBlob, null, null, false, this.hasTag("isAnimationSynchronized"), this.hasTag("isSoundSynchronized"));
+                    updateConnections(otherBlob, null, null, false, this.hasTag("ConveyorBlob::isAnimationSynchronized"), this.hasTag("ConveyorBlob::isSoundSynchronized"));
                     
                   }
                   

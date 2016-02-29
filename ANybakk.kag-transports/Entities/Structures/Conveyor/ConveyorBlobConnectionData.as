@@ -24,7 +24,7 @@ namespace ANybakk {
     
     ConveyorBlobConnectionData() {
     
-      mName = "isConnectedSelf";
+      mName = "ConveyorBlobConnectionData::isConnectedSelf";
       mOffset = Vec2f(0.0f, 0.0f);
       mOrientations.push_back(ANybakk::StructureVariables::DEFAULT_ORIENTATION);
       mCompatibilities.push_back("isConveyor");

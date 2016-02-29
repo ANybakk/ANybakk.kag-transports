@@ -14,9 +14,9 @@
 namespace ANybakk {
 
   namespace PipeBlob {
-
-
-
+  
+  
+  
     void onInit(CBlob@ this) {
     
       ANybakk::ConveyorBlob::onInit(this);
@@ -32,10 +32,10 @@ namespace ANybakk {
       this.Tag("isPipe");
       
       //Unset animation synchronized flag (pipes aren't animated collectively)
-      this.Untag("isAnimationSynchronized");
+      this.Untag("ConveyorBlob::isAnimationSynchronized");
       
       //Unset sound synchronized flag (pipes aren't animated collectively)
-      this.Untag("isSoundSynchronized");
+      this.Untag("ConveyorBlob::isSoundSynchronized");
       
       //Unset flag so that blob can be rotated when built (for BlobPlacement.as)
       this.Untag("place norotate");
@@ -118,7 +118,7 @@ namespace ANybakk {
           Vec2f overlappingPosition = overlappingBlob.getPosition();
           
           //Check if outside and in pipe
-          if(!this.isPointInside(overlappingPosition) && overlappingBlob.hasTag("isInPipe")) {
+          if(!this.isPointInside(overlappingPosition) && overlappingBlob.hasTag("PipeableBlob::isInPipe")) {
           
             //Obtain a reference to the map object
             CMap@ map = this.getMap();
@@ -162,7 +162,7 @@ namespace ANybakk {
               //Check if pipeable vanilla
               if(ANybakk::PipeableBlob::isConsideredPipeableVanilla(overlappingBlob)) {
               
-                //Manually call sprite's onTick once
+                //Manually call sprite's onTick once (handler not associated with vanilla types)
                 ANybakk::PipeableSprite::onTick(overlappingBlob.getSprite());
                 
               }
@@ -248,7 +248,7 @@ namespace ANybakk {
     bool canConvey(CBlob@ this, CBlob@ otherBlob) {
     
       return 
-        this.hasTag("isPlaced")
+        this.hasTag("StructureBlob::isPlaced")
         && this.get_u8("ConveyorBlobMode") != ANybakk::ConveyorBlobMode::MODE_OFF
         && otherBlob !is null
         && !otherBlob.hasTag("isStructure")

@@ -1,5 +1,8 @@
 /* 
- * Pipeable blob ("abstract" type).
+ * Pipeable blob ("abstract" type). Can also be used with vanilla types by 
+ * calling functions directly. Keep in mind that some default post-event 
+ * behaviour may reside in onTick handlers, so you might have to manually call 
+ * them once.
  * 
  * Author: ANybakk
  */
@@ -19,6 +22,9 @@ namespace ANybakk {
       //No hierarchy call
       
       setTags(this);
+      
+      //Store pipe ID
+      this.set_netid("PipeableBlob::enteredPipeID", 0);
       
     }
     
@@ -51,7 +57,7 @@ namespace ANybakk {
       if(otherBlob !is null && otherBlob.hasTag("isPipe")) {
       
         //Store pipe ID
-        this.set_netid("enteredPipeID", otherBlob.getNetworkID());
+        this.set_netid("PipeableBlob::enteredPipeID", otherBlob.getNetworkID());
         
         //Obtain a reference to the shape object
         CShape@ shape = this.getShape();
@@ -74,8 +80,8 @@ namespace ANybakk {
         }
         
         //Update flags
-        this.Tag("isInPipe");
-        this.Tag("wasEnteredPipe"); //For sprite
+        this.Tag("PipeableBlob::isInPipe");
+        this.Tag("PipeableBlob::wasEnteredPipe"); //For sprite
       
       }
       
@@ -88,10 +94,10 @@ namespace ANybakk {
      */
     void exitPipe(CBlob@ this) {
       
-      if(this.hasTag("isInPipe")) {
+      if(this.hasTag("PipeableBlob::isInPipe")) {
       
         //Store pipe ID
-        this.set_netid("enteredPipeID", 0);
+        this.set_netid("PipeableBlob::enteredPipeID", 0);
         
         //Obtain a reference to the shape object
         CShape@ shape = this.getShape();
@@ -109,8 +115,8 @@ namespace ANybakk {
         //this.getSprite().SetVisible(false);
         
         //Update flags
-        this.Untag("isInPipe");
-        this.Tag("wasExitedPipe"); //For sprite
+        this.Untag("PipeableBlob::isInPipe");
+        this.Tag("PipeableBlob::wasExitedPipe"); //For sprite
         
       }
       

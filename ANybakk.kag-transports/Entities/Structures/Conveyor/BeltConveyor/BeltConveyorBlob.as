@@ -141,19 +141,10 @@ namespace ANybakk {
     void onCollision(CBlob@ this, CBlob@ otherBlob, bool solid, Vec2f normal, Vec2f point1) {
     
       //If this is tagged as placed while other is a valid blob, not a conveyor, and above
-      if(this.hasTag("isPlaced") && otherBlob !is null && !otherBlob.hasTag("isConveyor") && normal.y > 0.0f) {
+      if(this.hasTag("StructureBlob::isPlaced") && otherBlob !is null && !otherBlob.hasTag("isConveyor") && normal.y > 0.0f) {
         
         //Store ID of segment
         otherBlob.set_netid("isTouchingID", this.getNetworkID());
-        
-        //Check if not tagged as touching
-        //if(!otherBlob.hasTag("isTouchingBeltConveyor")) {
-      
-          //Tag as touching
-          //otherBlob.Tag("isTouchingBeltConveyor");
-          
-          
-        //}
         
       }
       
@@ -165,23 +156,6 @@ namespace ANybakk {
     
     
     void onEndCollision(CBlob@ this, CBlob@ otherBlob) {
-      
-      /*
-      if(otherBlob !is null) {
-        
-        //Determine if other blob is moving upwards
-        bool isMovingUpwards = otherBlob.getVelocity().y < 0.0f;
-        
-        //Check if moving upwards (blob left the belt conveyor)
-        if(isMovingUpwards) {
-        
-          //Disable touching flag
-          otherBlob.Untag("isTouchingBeltConveyor");
-          
-        }
-      
-      }
-      */
       
       //Finished
       return;
@@ -198,7 +172,7 @@ namespace ANybakk {
       updateDirection(this);
         
       //Check if recently placed
-      if(this.hasTag("wasPlaced")) {
+      if(this.hasTag("StructureBlob::wasPlaced")) {
       
         //Obtain a reference to the map object
         CMap@ map = this.getMap();
@@ -237,7 +211,7 @@ namespace ANybakk {
       ANybakk::ConveyorBlob::onDie(this);
     
       //Check if placed
-      if(this.hasTag("isPlaced")) {
+      if(this.hasTag("StructureBlob::isPlaced")) {
       
         //Obtain a reference to the map object
         CMap@ map = this.getMap();

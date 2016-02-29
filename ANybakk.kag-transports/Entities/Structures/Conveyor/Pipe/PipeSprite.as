@@ -36,7 +36,7 @@ namespace ANybakk {
     void onTick(CSprite@ this) {
       
       //Check if recently placed
-      if(this.getBlob().hasTag("wasPlaced")) {
+      if(this.getBlob().hasTag("StructureBlob::wasPlaced")) {
       
         //Put in the background layer
         ANybakk::EntitySprite::setLayer(this, ANybakk::EntitySpriteLayer::LAYER_BACKGROUND);

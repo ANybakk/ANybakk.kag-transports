@@ -32,10 +32,10 @@ namespace ANybakk {
     const ANybakk::ConveyorBlobModeData[] MODE_DATA = { 
     
       //Define an off mode with a target velocity of 0.0, 0.0
-      ANybakk::ConveyorBlobModeData(ANybakk::ConveyorBlobMode::MODE_OFF, Vec2f(0.0f, 0.0f)),
+      ANybakk::ConveyorBlobModeData(ANybakk::ConveyorBlobMode::MODE_OFF, Vec2f(0.0f, 0.0f), "", 60.0f),
     
       //Define a slow mode with a target velocity of 1.0, 1.0
-      ANybakk::ConveyorBlobModeData(ANybakk::ConveyorBlobMode::MODE_SLOW, Vec2f(1.0f, 1.0f))
+      ANybakk::ConveyorBlobModeData(ANybakk::ConveyorBlobMode::MODE_SLOW, Vec2f(1.0f, 1.0f), "", 60.0f)
       
     };
   
@@ -81,16 +81,16 @@ namespace ANybakk {
     const ANybakk::ConveyorBlobConnectionData[] CONNECTION_DATA = { 
     
       //Define an up connection with an offset of 0.0, -8.0
-      ANybakk::ConveyorBlobConnectionData("isConnectedUp", Vec2f(0.0f, -8.0f), CONNECTION_DATA_UP_ORIENTATIONS, CONNECTION_DATA_COMPATIBILITIES),
+      ANybakk::ConveyorBlobConnectionData("ConveyorVariables::isConnectedUp", Vec2f(0.0f, -8.0f), CONNECTION_DATA_UP_ORIENTATIONS, CONNECTION_DATA_COMPATIBILITIES),
     
       //Define a right connection with an offset of 8.0, 0.0
-      ANybakk::ConveyorBlobConnectionData("isConnectedRight", Vec2f(8.0f, 0.0f), CONNECTION_DATA_RIGHT_ORIENTATIONS, CONNECTION_DATA_COMPATIBILITIES),
+      ANybakk::ConveyorBlobConnectionData("ConveyorVariables::isConnectedRight", Vec2f(8.0f, 0.0f), CONNECTION_DATA_RIGHT_ORIENTATIONS, CONNECTION_DATA_COMPATIBILITIES),
     
       //Define a down connection with an offset of 0.0, 8.0
-      ANybakk::ConveyorBlobConnectionData("isConnectedDown", Vec2f(0.0f, 8.0f), CONNECTION_DATA_DOWN_ORIENTATIONS, CONNECTION_DATA_COMPATIBILITIES),
+      ANybakk::ConveyorBlobConnectionData("ConveyorVariables::isConnectedDown", Vec2f(0.0f, 8.0f), CONNECTION_DATA_DOWN_ORIENTATIONS, CONNECTION_DATA_COMPATIBILITIES),
     
       //Define a left connection with an offset of -8.0, 0.0
-      ANybakk::ConveyorBlobConnectionData("isConnectedLeft", Vec2f(-8.0f, 0.0f), CONNECTION_DATA_LEFT_ORIENTATIONS, CONNECTION_DATA_COMPATIBILITIES)
+      ANybakk::ConveyorBlobConnectionData("ConveyorVariables::isConnectedLeft", Vec2f(-8.0f, 0.0f), CONNECTION_DATA_LEFT_ORIENTATIONS, CONNECTION_DATA_COMPATIBILITIES)
       
     };
     
@@ -104,6 +104,8 @@ namespace ANybakk {
   }
 
   namespace PipeFunnelVariables {
+  
+    const string SOUND_ON_ENTERED = "PipeFunnelEntered.ogg";
     
   }
   

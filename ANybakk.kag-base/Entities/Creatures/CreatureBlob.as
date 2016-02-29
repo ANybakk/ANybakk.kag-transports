@@ -36,7 +36,7 @@ namespace ANybakk {
     void setTags(CBlob@ this) {
     
       this.Tag("isCreature");
-      this.Tag("isMadeOfFlesh");
+      this.Tag("CreatureBlob::isMadeOfFlesh");
       this.Tag("flesh"); //Vanilla tag that allows being targeted by a bison for instance
       
     }

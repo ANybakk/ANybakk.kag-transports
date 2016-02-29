@@ -32,8 +32,8 @@ namespace ANybakk {
     void setTags(CBlob@ this) {
     
       this.Tag("isStructure");
-      this.Untag("isPlaced");
-      this.Untag("wasPlaced");
+      this.Untag("StructureBlob::isPlaced");
+      this.Untag("StructureBlob::wasPlaced");
       
     }
     
@@ -50,10 +50,10 @@ namespace ANybakk {
       }
       
       //Tag as placed (used by sprite/sound)
-      this.Tag("wasPlaced");
+      this.Tag("StructureBlob::wasPlaced");
       
       //Tag as placed
-      this.Tag("isPlaced");
+      this.Tag("StructureBlob::isPlaced");
       
       //Store orientation using segment's angle
       this.set_u16("StructureBlobOrientation", this.getShape().getAngleDegrees());
@@ -66,6 +66,20 @@ namespace ANybakk {
 
       return false;
 
+    }
+    
+    
+    
+    void onDie(CBlob@ this) {
+    
+      //Check if valid and placed
+      if(this !is null && this.hasTag("StructureBlob::isPlaced")) {
+      
+        //Tag as recently destroyed
+        this.Tag("StructureBlob::wasDestroyed");
+        
+      }
+      
     }
     
     

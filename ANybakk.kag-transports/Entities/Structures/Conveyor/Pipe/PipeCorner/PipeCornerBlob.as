@@ -60,7 +60,7 @@ namespace ANybakk {
       ANybakk::PipeBlob::onSetStatic(this, isStatic);
       
       //Check if placed
-      if(this.hasTag("isPlaced")) {
+      if(this.hasTag("StructureBlob::isPlaced")) {
       
         //Retrieve current orientation
         u16 orientation = this.get_u16("StructureBlobOrientation");
@@ -161,7 +161,7 @@ namespace ANybakk {
           @overlappingBlob = overlappingBlobs[i];
           
           //Check if valid, is within and in pipe
-          if(overlappingBlob !is null && this.isPointInside(overlappingBlob.getPosition()) && overlappingBlob.hasTag("isInPipe")) {
+          if(overlappingBlob !is null && this.isPointInside(overlappingBlob.getPosition()) && overlappingBlob.hasTag("PipeableBlob::isInPipe")) {
             
             propel(this, overlappingBlob);
             

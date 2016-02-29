@@ -38,13 +38,13 @@ namespace ANybakk {
       CBlob@ blob = this.getBlob();
       
       //Check if tagged as recently placed
-      if(blob.hasTag("wasPlaced")) {
+      if(blob.hasTag("StructureBlob::wasPlaced")) {
       
         //Play a sound
         this.PlaySound(ANybakk::StructureVariables::PLACEMENT_SOUND);
         
         //Remove flag
-        blob.Untag("wasPlaced");
+        blob.Untag("StructureBlob::wasPlaced");
         
       }
       
@@ -65,7 +65,7 @@ namespace ANybakk {
       CBlob@ blob = this.getBlob();
       
       //Check if segment was recently placed
-      if(blob.hasTag("wasPlaced")) {
+      if(blob.hasTag("StructureBlob::wasPlaced")) {
       
         //Retrieve current orientation
         u16 orientation = blob.get_u16("StructureBlobOrientation");

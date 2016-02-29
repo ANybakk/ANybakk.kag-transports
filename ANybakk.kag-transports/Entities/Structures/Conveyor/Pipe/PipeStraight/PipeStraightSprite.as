@@ -23,6 +23,20 @@ namespace ANybakk {
     
       ANybakk::PipeSprite::onInit(this);
       
+      /* For transparent pipe
+      CSpriteLayer@ layer = this.addSpriteLayer("background", "PipeStraightBackground.png", 8, 8);
+      
+      if(layer !is null) {
+      
+        layer.SetVisible(true);
+        layer.SetRelativeZ(-499.0f);
+        Animation@ anim = layer.addAnimation("default", 0, false);
+        int[] frames = {0, 1};
+        anim.AddFrames(frames);
+        
+      }
+      */
+
       //Finished
       return;
       

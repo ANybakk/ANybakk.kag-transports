@@ -41,11 +41,15 @@ namespace ANybakk {
       //Obtain a reference to the blob object
       CBlob@ blob = this.getBlob();
       
-      if(blob.hasTag("wasEntered")) {
+      if(blob.hasTag("PipeFunnelBlob::wasEntered")) {
       
-        this.PlaySound("PipeFunnelEntered.ogg");
+        if(ANybakk::PipeFunnelVariables::SOUND_ON_ENTERED != "") {
         
-        blob.Untag("wasEntered");
+          this.PlaySound(ANybakk::PipeFunnelVariables::SOUND_ON_ENTERED);
+          
+        }
+        
+        blob.Untag("PipeFunnelBlob::wasEntered");
         
       }
     

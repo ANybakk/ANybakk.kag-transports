@@ -29,7 +29,7 @@ namespace ANybakk {
       setTags(this);
       
       //Set blank ID of object
-      this.set_netid("isMovingID", 0);
+      //this.set_netid("isMovingID", 0);
       
     }
     
@@ -39,7 +39,7 @@ namespace ANybakk {
     
       this.Tag("isPipeFunnel");
       
-      this.Untag("wasEntered");
+      this.Untag("PipeFunnelBlob::wasEntered");
       
     }
     
@@ -147,7 +147,7 @@ namespace ANybakk {
     void onCollision(CBlob@ this, CBlob@ otherBlob, bool solid, Vec2f normal, Vec2f point1) {
       
       //Check if can convey and object not already in a pipe
-      if(ANybakk::PipeBlob::canConvey(this, otherBlob) && !otherBlob.hasTag("isInPipe")) {
+      if(ANybakk::PipeBlob::canConvey(this, otherBlob) && !otherBlob.hasTag("PipeableBlob::isInPipe")) {
       
         //Retrieve current orientation
         u16 orientation = this.get_u16("StructureBlobOrientation");
@@ -217,68 +217,14 @@ namespace ANybakk {
           Vec2f overlappingPosition = overlappingBlob.getPosition();
           
           //Check if within and in pipe
-          if(this.isPointInside(overlappingPosition) && overlappingBlob.hasTag("isInPipe")) {
+          if(this.isPointInside(overlappingPosition) && overlappingBlob.hasTag("PipeableBlob::isInPipe")) {
           
             //Determine if this blob entered the pipe through this segment
-            //bool enteredThis = (overlappingBlob.get_netid("enteredPipeID") == this.getNetworkID());
+            //bool enteredThis = (overlappingBlob.get_netid("PipeableBlob::enteredPipeID") == this.getNetworkID());
             
             propel(this, overlappingBlob);
             
           }
-          /*
-          //Otherwise, check if outside and in pipe
-          else if(!this.isPointInside(overlappingPosition) && overlappingBlob.hasTag("isInPipe")) {
-          
-            //Obtain a reference to the map object
-            CMap@ map = this.getMap();
-            
-            //Create a blob array
-            CBlob@[] blobsAtPosition;
-            
-            //Create a valid pipe flag
-            bool isValidPipe = false;
-            
-            //Check if any blobs at position
-            if(map.getBlobsAtPosition(overlappingPosition, blobsAtPosition)) {
-            
-              //Create blob handle
-              CBlob@ blobAtPosition;
-              
-              //Iterate through blobs
-              for(int i=0; i<blobsAtPosition.length; i++) {
-              
-                //Keep blob reference
-                @blobAtPosition = blobsAtPosition[i];
-                
-                //Check if blob is valid and is pipe
-                if(blobAtPosition !is null && blobAtPosition.hasTag("isPipe")) {
-                
-                  //Check if connected
-                  isValidPipe = isValidPipe || ANybakk::ConveyorBlob::isConnected(this, blobAtPosition);
-                  
-                }
-                
-              }
-            
-            }
-            
-            //Check if valid pipe was not found
-            if(!isValidPipe) {
-    
-              //Tell pipeable to enter this pipe
-              ANybakk::PipeableBlob::exitPipe(overlappingBlob);
-              
-              //Check if pipeable vanilla
-              if(ANybakk::PipeableBlob::isConsideredPipeableVanilla(overlappingBlob)) {
-              
-                //Manually call sprite's onTick once
-                ANybakk::PipeableSprite::onTick(overlappingBlob.getSprite());
-                
-              }
-              
-            }
-            
-          }*/
           
         }
         
@@ -418,13 +364,13 @@ namespace ANybakk {
       //Check if pipeable vanilla
       if(ANybakk::PipeableBlob::isConsideredPipeableVanilla(otherBlob)) {
       
-        //Manually call sprite's onTick once
+        //Manually call sprite's onTick once (handler not associated with vanilla types)
         ANybakk::PipeableSprite::onTick(otherBlob.getSprite());
         
       }
       
       //Set entered pipe flag
-      this.Tag("wasEntered");
+      this.Tag("PipeFunnelBlob::wasEntered");
       
     }
     
